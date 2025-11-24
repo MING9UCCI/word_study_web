@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Trash2, Volume2, Pencil, Check, X } from 'lucide-react';
+import { Trash2, Volume2, Pencil, Check, X, Search } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
 
-export const WordList = ({ words, onDelete, onEdit }) => {
+export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
     const { speak } = useSpeech();
     const [editingId, setEditingId] = useState(null);
     const [editEnglish, setEditEnglish] = useState('');
     const [editKorean, setEditKorean] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const startEdit = (word) => {
         setEditingId(word.id);
@@ -27,6 +28,11 @@ export const WordList = ({ words, onDelete, onEdit }) => {
         }
     };
 
+    const filteredWords = words.filter(word =>
+        word.english.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        word.korean.includes(searchTerm)
+    );
+
     if (words.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500 dark:text-gray-400">
@@ -38,7 +44,19 @@ export const WordList = ({ words, onDelete, onEdit }) => {
 
     return (
         <div className="space-y-3">
-            {words.map((word) => (
+            {/* Search Bar */}
+            <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search words..."
+                    className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+            </div>
+
+            {filteredWords.map((word) => (
                 <div
                     key={word.id}
                     className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
@@ -85,7 +103,7 @@ export const WordList = ({ words, onDelete, onEdit }) => {
                                         {word.english}
                                     </h3>
                                     <button
-                                        onClick={() => speak(word.english)}
+                                        onClick={() => speak(word.english, ttsSettings)}
                                         className="rounded-full p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                         aria-label="Listen to pronunciation"
                                     >

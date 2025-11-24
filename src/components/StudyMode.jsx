@@ -1,28 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { Flashcard } from './Flashcard';
 import { ProgressBar } from './ProgressBar';
-import { Check, X, Filter } from 'lucide-react';
+import { Check, X, Filter, Shuffle, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSpeech } from '../hooks/useSpeech';
 
-export const StudyMode = ({ words, onToggleMemorized }) => {
+export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
+    const { speak } = useSpeech();
     const [showUnmemorizedOnly, setShowUnmemorizedOnly] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
+    const [studyWords, setStudyWords] = useState(words);
 
     // Filter words based on mode
-    const studyWords = showUnmemorizedOnly
-        ? words.filter(w => !w.memorized)
-        : words;
+    useEffect(() => {
+        const filtered = showUnmemorizedOnly
+            ? words.filter(w => !w.memorized)
+            : words;
+        setStudyWords(filtered);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+    }, [words, showUnmemorizedOnly]);
 
     const currentWord = studyWords[currentIndex];
     const memorizedCount = words.filter(w => w.memorized).length;
 
-    // Reset index when filter changes or words change
-    useEffect(() => {
-        if (currentIndex >= studyWords.length) {
-            setCurrentIndex(Math.max(0, studyWords.length - 1));
-        }
-    }, [studyWords.length, currentIndex]);
+    const handleShuffle = () => {
+        const shuffled = [...studyWords].sort(() => Math.random() - 0.5);
+        setStudyWords(shuffled);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+    };
 
     const handleNext = () => {
         setIsFlipped(false);
@@ -30,10 +38,16 @@ export const StudyMode = ({ words, onToggleMemorized }) => {
             if (currentIndex < studyWords.length - 1) {
                 setCurrentIndex(prev => prev + 1);
             } else {
-                // Loop back to start or show finished state
                 setCurrentIndex(0);
             }
         }, 200);
+    };
+
+    const handlePrev = () => {
+        if (currentIndex > 0) {
+            setIsFlipped(false);
+            setCurrentIndex(prev => prev - 1);
+        }
     };
 
     const handleMemorized = () => {
@@ -78,8 +92,8 @@ export const StudyMode = ({ words, onToggleMemorized }) => {
                 <button
                     onClick={() => setShowUnmemorizedOnly(!showUnmemorizedOnly)}
                     className={`ml-4 rounded-lg p-2 transition-colors ${showUnmemorizedOnly
-                            ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
+                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
                         }`}
                     aria-label="Toggle unmemorized filter"
                 >
@@ -104,6 +118,50 @@ export const StudyMode = ({ words, onToggleMemorized }) => {
                         />
                     </motion.div>
                 </AnimatePresence>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => speak(currentWord.english, ttsSettings)}
+                        className="rounded-full bg-blue-100 p-3 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
+                    >
+                        <Volume2 className="h-6 w-6" />
+                    </button>
+                    <button
+                        onClick={handleShuffle}
+                        className="rounded-full bg-purple-100 p-3 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400"
+                        title="Shuffle Cards"
+                    >
+                        <Shuffle className="h-6 w-6" />
+                    </button>
+                </div>
+                <button
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    className="rounded-xl bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                >
+                    {isFlipped ? 'Show English' : 'Show Meaning'}
+                </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+                <button
+                    onClick={handlePrev}
+                    disabled={currentIndex === 0}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
+                >
+                    <ArrowLeft className="h-5 w-5" />
+                    Prev
+                </button>
+                <button
+                    onClick={handleNext}
+                    disabled={currentIndex === studyWords.length - 1}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                    Next
+                    <ArrowRight className="h-5 w-5" />
+                </button>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pb-4">

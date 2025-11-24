@@ -7,6 +7,7 @@ import { BottomNav } from './components/BottomNav';
 import { GroupList } from './components/GroupList';
 import { QuizMode } from './components/QuizMode';
 import { DataManagement } from './components/DataManagement';
+import { SettingsModal } from './components/SettingsModal';
 import { useWords } from './hooks/useWords';
 import { ArrowLeft } from 'lucide-react';
 
@@ -15,6 +16,13 @@ function App() {
     const saved = localStorage.getItem('toeic-dark-mode');
     return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  const [ttsSettings, setTtsSettings] = useState(() => {
+    const saved = localStorage.getItem('toeic-tts-settings');
+    return saved ? JSON.parse(saved) : { rate: 1.0, voiceURI: null };
+  });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const [currentMode, setCurrentMode] = useState('manage'); // 'manage' | 'study'
   const [currentGroupId, setCurrentGroupId] = useState(null); // null = showing group list
@@ -35,6 +43,10 @@ function App() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    localStorage.setItem('toeic-tts-settings', JSON.stringify(ttsSettings));
+  }, [ttsSettings]);
+
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
   // Filter words by current group
@@ -50,7 +62,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors dark:bg-gray-900 dark:text-white">
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <Header
+        darkMode={darkMode}
+        toggleDarkMode={toggleDarkMode}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={ttsSettings}
+        onSave={setTtsSettings}
+      />
 
       <main className="mx-auto max-w-md px-4 pb-24 pt-6">
         {/* Back Button for Group View */}
@@ -83,7 +106,12 @@ function App() {
                 <span className="text-sm text-gray-500">{currentGroupWords.length} words</span>
               </div>
               <WordForm onAdd={(en, ko) => addWord(en, ko, currentGroupId)} />
-              <WordList words={currentGroupWords} onDelete={deleteWord} onEdit={editWord} />
+              <WordList
+                words={currentGroupWords}
+                onDelete={deleteWord}
+                onEdit={editWord}
+                ttsSettings={ttsSettings}
+              />
             </div>
           )
         ) : (
@@ -126,7 +154,11 @@ function App() {
               </div>
 
               {studyType === 'flashcard' ? (
-                <StudyMode words={currentGroupWords} onToggleMemorized={toggleMemorized} />
+                <StudyMode
+                  words={currentGroupWords}
+                  onToggleMemorized={toggleMemorized}
+                  ttsSettings={ttsSettings}
+                />
               ) : (
                 <QuizMode words={currentGroupWords} />
               )}
