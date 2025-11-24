@@ -10,10 +10,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [],
       manifest: {
-        name: 'TOEIC Vocabulary Study',
-        short_name: 'TOEIC Vocab',
-        description: 'A mobile-first vocabulary study app for TOEIC.',
-        theme_color: '#ffffff',
+        name: 'MyVoca - Vocabulary Study',
+        short_name: 'MyVoca',
+        description: 'A mobile-first vocabulary study app with cloud sync and SRS.',
+        theme_color: '#3B82F6',
         icons: [
           {
             src: 'icon-192.png',

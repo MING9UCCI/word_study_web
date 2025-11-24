@@ -6,7 +6,7 @@ export const Header = ({ darkMode, toggleDarkMode, onOpenSettings, user, onLogin
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-6 py-4 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80">
             <div className="mx-auto flex max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl items-center justify-between">
                 <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-black tracking-tight text-transparent dark:from-blue-400 dark:to-purple-400">
-                    TOEIC Vocab
+                    MyVoca
                 </h1>
                 <div className="flex items-center gap-2">
                     {user ? (
