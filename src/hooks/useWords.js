@@ -33,6 +33,12 @@ export const useWords = () => {
         setGroups(prev => [...prev, newGroup]);
     };
 
+    const editGroup = (id, newName) => {
+        setGroups(prev => prev.map(g =>
+            g.id === id ? { ...g, name: newName } : g
+        ));
+    };
+
     const deleteGroup = (id) => {
         if (id === 'default') return; // Prevent deleting default group
         setGroups(prev => prev.filter(g => g.id !== id));
@@ -102,6 +108,7 @@ export const useWords = () => {
         deleteWord,
         toggleMemorized,
         addGroup,
+        editGroup,
         deleteGroup,
         importData,
         exportData

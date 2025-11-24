@@ -20,14 +20,18 @@ function App() {
   const [currentGroupId, setCurrentGroupId] = useState(null); // null = showing group list
   const [studyType, setStudyType] = useState('flashcard'); // 'flashcard' | 'quiz'
 
-  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, addGroup, deleteGroup, importData, exportData } = useWords();
+  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, addGroup, deleteGroup, editGroup, importData, exportData } = useWords();
 
   useEffect(() => {
     localStorage.setItem('toeic-dark-mode', JSON.stringify(darkMode));
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#111827'); // gray-900
     } else {
       document.documentElement.classList.remove('dark');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#f9fafb'); // gray-50
     }
   }, [darkMode]);
 
@@ -68,6 +72,7 @@ function App() {
                 onSelectGroup={setCurrentGroupId}
                 onAddGroup={addGroup}
                 onDeleteGroup={deleteGroup}
+                onEditGroup={editGroup}
               />
               <DataManagement onImport={importData} onExport={exportData} />
             </>
@@ -91,6 +96,7 @@ function App() {
                 onSelectGroup={setCurrentGroupId}
                 onAddGroup={addGroup}
                 onDeleteGroup={deleteGroup}
+                onEditGroup={editGroup}
               />
             </div>
           ) : (

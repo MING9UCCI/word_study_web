@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Folder, Plus, Trash2, ChevronRight } from 'lucide-react';
+import { Folder, Plus, Trash2, ChevronRight, Pencil, Check, X } from 'lucide-react';
 
-export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup }) => {
+export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup, onEditGroup }) => {
     const [newGroupName, setNewGroupName] = useState('');
     const [isAdding, setIsAdding] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editName, setEditName] = useState('');
 
     const handleAdd = (e) => {
         e.preventDefault();
@@ -11,6 +13,26 @@ export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup }) 
         onAddGroup(newGroupName);
         setNewGroupName('');
         setIsAdding(false);
+    };
+
+    const startEdit = (e, group) => {
+        e.stopPropagation();
+        setEditingId(group.id);
+        setEditName(group.name);
+    };
+
+    const cancelEdit = (e) => {
+        e?.stopPropagation();
+        setEditingId(null);
+        setEditName('');
+    };
+
+    const saveEdit = (e, id) => {
+        e?.stopPropagation();
+        if (editName.trim()) {
+            onEditGroup(id, editName);
+            setEditingId(null);
+        }
     };
 
     return (
@@ -48,37 +70,71 @@ export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup }) 
                 {groups.map((group) => (
                     <div
                         key={group.id}
-                        onClick={() => onSelectGroup(group.id)}
+                        onClick={() => editingId !== group.id && onSelectGroup(group.id)}
                         className="flex cursor-pointer items-center justify-between rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:bg-gray-800"
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                <Folder className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">{group.name}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(group.createdAt).toLocaleDateString()}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            {group.id !== 'default' && (
+                        {editingId === group.id ? (
+                            <div className="flex w-full items-center gap-2" onClick={e => e.stopPropagation()}>
+                                <input
+                                    type="text"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    className="flex-1 rounded-lg border border-gray-200 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                    autoFocus
+                                />
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm('Delete this folder and all its words?')) {
-                                            onDeleteGroup(group.id);
-                                        }
-                                    }}
-                                    className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                                    onClick={(e) => saveEdit(e, group.id)}
+                                    className="rounded-lg p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30"
                                 >
-                                    <Trash2 className="h-5 w-5" />
+                                    <Check className="h-5 w-5" />
                                 </button>
-                            )}
-                            <ChevronRight className="h-5 w-5 text-gray-400" />
-                        </div>
+                                <button
+                                    onClick={cancelEdit}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                                        <Folder className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white">{group.name}</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {new Date(group.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                    {group.id !== 'default' && (
+                                        <>
+                                            <button
+                                                onClick={(e) => startEdit(e, group)}
+                                                className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 hover:text-blue-500 dark:hover:bg-gray-800"
+                                            >
+                                                <Pencil className="h-5 w-5" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (confirm('Delete this folder and all its words?')) {
+                                                        onDeleteGroup(group.id);
+                                                    }
+                                                }}
+                                                className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        </>
+                                    )}
+                                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                                </div>
+                            </>
+                        )}
                     </div>
                 ))}
             </div>
