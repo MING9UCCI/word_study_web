@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Flashcard } from './Flashcard';
 import { ProgressBar } from './ProgressBar';
-import { Check, X, Filter, Shuffle, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Check, X, Filter, Shuffle, Volume2, ArrowLeft, ArrowRight, RotateCcw, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpeech } from '../hooks/useSpeech';
 
-export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
+export const StudyMode = ({ words, onToggleMemorized, ttsSettings, onExit }) => {
     const { speak } = useSpeech();
     const [showUnmemorizedOnly, setShowUnmemorizedOnly] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [studyWords, setStudyWords] = useState(words);
+    const [isFinished, setIsFinished] = useState(false);
 
     // Filter words based on mode
     useEffect(() => {
@@ -20,6 +21,7 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
         setStudyWords(filtered);
         setCurrentIndex(0);
         setIsFlipped(false);
+        setIsFinished(false);
     }, [words, showUnmemorizedOnly]);
 
     const currentWord = studyWords[currentIndex];
@@ -30,6 +32,7 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
         setStudyWords(shuffled);
         setCurrentIndex(0);
         setIsFlipped(false);
+        setIsFinished(false);
     };
 
     const handleNext = () => {
@@ -38,7 +41,7 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
             if (currentIndex < studyWords.length - 1) {
                 setCurrentIndex(prev => prev + 1);
             } else {
-                setCurrentIndex(0);
+                setIsFinished(true);
             }
         }, 200);
     };
@@ -61,6 +64,12 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
         handleNext();
     };
 
+    const handleRestart = () => {
+        setCurrentIndex(0);
+        setIsFlipped(false);
+        setIsFinished(false);
+    };
+
     if (studyWords.length === 0) {
         return (
             <div className="flex h-full flex-col items-center justify-center space-y-4 text-center">
@@ -81,6 +90,39 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
                         Show all words
                     </button>
                 )}
+            </div>
+        );
+    }
+
+    if (isFinished) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center space-y-6 text-center">
+                <div className="rounded-full bg-blue-100 p-6 dark:bg-blue-900/30">
+                    <Check className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Session Complete!</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        You've reviewed all {studyWords.length} words in this list.
+                    </p>
+                </div>
+
+                <div className="flex w-full max-w-xs flex-col gap-3">
+                    <button
+                        onClick={handleRestart}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98]"
+                    >
+                        <RotateCcw className="h-5 w-5" />
+                        Study Again
+                    </button>
+                    <button
+                        onClick={onExit}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3 font-bold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                        <Home className="h-5 w-5" />
+                        Back to Menu
+                    </button>
+                </div>
             </div>
         );
     }
@@ -156,8 +198,7 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings }) => {
                 </button>
                 <button
                     onClick={handleNext}
-                    disabled={currentIndex === studyWords.length - 1}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
                 >
                     Next
                     <ArrowRight className="h-5 w-5" />

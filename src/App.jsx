@@ -36,9 +36,11 @@ function App() {
 
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#111827'; // Ensure body matches dark theme
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#111827'); // gray-900
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#f9fafb'; // Ensure body matches light theme
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#f9fafb'); // gray-50
     }
   }, [darkMode]);
@@ -158,6 +160,7 @@ function App() {
                   words={currentGroupWords}
                   onToggleMemorized={toggleMemorized}
                   ttsSettings={ttsSettings}
+                  onExit={handleBack}
                 />
               ) : (
                 <QuizMode words={currentGroupWords} />
