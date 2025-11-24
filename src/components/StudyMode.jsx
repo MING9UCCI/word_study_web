@@ -208,7 +208,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pb-4">
+            <div className="grid grid-cols-2 gap-4 pb-20 md:pb-4">
                 <button
                     onClick={() => handleResult(false)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-orange-100 py-4 font-semibold text-orange-700 transition-transform active:scale-95 dark:bg-orange-900/30 dark:text-orange-400"
