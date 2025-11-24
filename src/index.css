@@ -25,3 +25,40 @@
     transform: rotateY(180deg);
   }
 }
+
+@media print {
+
+  /* Hide UI elements */
+  header,
+  nav,
+  button,
+  input,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure body is white and text is black */
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* Reset layout for printing */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Style word list for printing */
+  .space-y-6,
+  .space-y-3 {
+    space-y: 0 !important;
+  }
+
+  /* Ensure all words are visible */
+  div {
+    overflow: visible !important;
+    height: auto !important;
+  }
+}

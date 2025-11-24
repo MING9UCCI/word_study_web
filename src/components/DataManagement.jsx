@@ -1,8 +1,12 @@
 import React, { useRef } from 'react';
-import { Download, Upload, FileJson } from 'lucide-react';
+import { Download, Upload, Printer } from 'lucide-react';
 
 export const DataManagement = ({ onImport, onExport }) => {
     const fileInputRef = useRef(null);
+
+    const handlePrint = () => {
+        window.print();
+    };
 
     const handleExport = () => {
         const data = onExport();
@@ -35,15 +39,22 @@ export const DataManagement = ({ onImport, onExport }) => {
     };
 
     return (
-        <div className="mt-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="mt-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800 no-print">
             <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Data Management</h3>
             <div className="flex gap-4">
+                <button
+                    onClick={handlePrint}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-purple-50 py-3 font-medium text-purple-600 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400"
+                >
+                    <Printer className="h-5 w-5" />
+                    Print / PDF
+                </button>
                 <button
                     onClick={handleExport}
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-50 py-3 font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
                 >
                     <Download className="h-5 w-5" />
-                    Export
+                    Export JSON
                 </button>
                 <button
                     onClick={() => fileInputRef.current?.click()}
