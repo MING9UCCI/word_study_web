@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+
 import { Flashcard } from './Flashcard';
 import { ProgressBar } from './ProgressBar';
 import { Check, X, Filter, Shuffle, Volume2, ArrowLeft, ArrowRight, RotateCcw, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpeech } from '../hooks/useSpeech';
 
-export const StudyMode = ({ words, onToggleMemorized, ttsSettings, onExit }) => {
+export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSettings, onExit }) => {
     const { speak } = useSpeech();
     const [showUnmemorizedOnly, setShowUnmemorizedOnly] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -53,15 +54,17 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings, onExit }) => 
         }
     };
 
-    const handleMemorized = () => {
+    const handleResult = (isCorrect) => {
         if (currentWord) {
-            onToggleMemorized(currentWord.id);
+            // If updateWordProgress is available (SRS mode), use it
+            if (updateWordProgress) {
+                updateWordProgress(currentWord.id, isCorrect);
+            } else {
+                // Fallback for legacy behavior (only if correct)
+                if (isCorrect) onToggleMemorized(currentWord.id);
+            }
             handleNext();
         }
-    };
-
-    const handleKeepStudying = () => {
-        handleNext();
     };
 
     const handleRestart = () => {
@@ -207,18 +210,18 @@ export const StudyMode = ({ words, onToggleMemorized, ttsSettings, onExit }) => 
 
             <div className="grid grid-cols-2 gap-4 pb-4">
                 <button
-                    onClick={handleKeepStudying}
+                    onClick={() => handleResult(false)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-orange-100 py-4 font-semibold text-orange-700 transition-transform active:scale-95 dark:bg-orange-900/30 dark:text-orange-400"
                 >
                     <X className="h-5 w-5" />
-                    Not Yet
+                    Forgot
                 </button>
                 <button
-                    onClick={handleMemorized}
+                    onClick={() => handleResult(true)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-green-100 py-4 font-semibold text-green-700 transition-transform active:scale-95 dark:bg-green-900/30 dark:text-green-400"
                 >
                     <Check className="h-5 w-5" />
-                    Memorized
+                    Got it
                 </button>
             </div>
         </div>

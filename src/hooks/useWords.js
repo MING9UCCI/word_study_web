@@ -42,20 +42,20 @@ export const useWords = () => {
     const deleteGroup = (id) => {
         if (id === 'default') return; // Prevent deleting default group
         setGroups(prev => prev.filter(g => g.id !== id));
-        // Move words from deleted group to default or delete them? 
-        // Let's delete them for now to keep it simple, or we could move them.
-        // User didn't specify, but deleting folder usually implies deleting contents.
         setWords(prev => prev.filter(w => w.groupId !== id));
     };
 
-    const addWord = (english, korean, groupId = 'default') => {
+    const addWord = (english, korean, groupId = 'default', example = '') => {
         const newWord = {
             id: Date.now().toString(),
             english,
             korean,
+            example,
             memorized: false,
-            groupId, // Associate word with a group
+            groupId,
             createdAt: Date.now(),
+            level: 0,
+            nextReview: Date.now()
         };
         setWords(prev => [newWord, ...prev]);
     };
@@ -74,6 +74,34 @@ export const useWords = () => {
         setWords(prev => prev.map(word =>
             word.id === id ? { ...word, memorized: !word.memorized } : word
         ));
+    };
+
+    const updateWordProgress = (id, isCorrect) => {
+        setWords(prev => prev.map(w => {
+            if (w.id !== id) return w;
+
+            // SRS Intervals: 1d, 3d, 7d, 14d, 30d
+            const intervals = [1, 3, 7, 14, 30];
+            let newLevel = w.level || 0;
+
+            if (isCorrect) {
+                newLevel = Math.min(newLevel + 1, 5);
+            } else {
+                newLevel = 0; // Reset if forgotten
+            }
+
+            const nextReview = new Date();
+            if (newLevel > 0) {
+                nextReview.setDate(nextReview.getDate() + intervals[newLevel - 1]);
+            }
+
+            return {
+                ...w,
+                level: newLevel,
+                nextReview: nextReview.getTime(),
+                memorized: newLevel >= 5 // Mark as memorized if mastered
+            };
+        }));
     };
 
     const importData = (jsonData) => {
@@ -95,10 +123,42 @@ export const useWords = () => {
         return JSON.stringify({ words, groups }, null, 2);
     };
 
-    // Migration helper: Assign existing words without groupId to 'default'
+    // Migration helper
     useEffect(() => {
         setWords(prev => prev.map(w => w.groupId ? w : { ...w, groupId: 'default' }));
     }, []);
+
+    const loadDefaultSets = (defaultSets) => {
+        // Add default sets as new groups and words
+        defaultSets.forEach(set => {
+            const groupId = Date.now().toString() + Math.random();
+            const newGroup = {
+                id: groupId,
+                name: set.name,
+                createdAt: Date.now()
+            };
+
+            const newWords = set.words.map((word, index) => ({
+                id: `${groupId}-${index}`,
+                english: word.english,
+                korean: word.korean,
+                example: word.example || '',
+                groupId: groupId,
+                memorized: false,
+                level: 0,
+                nextReview: Date.now(),
+                createdAt: Date.now()
+            }));
+
+            setGroups(prev => [...prev, newGroup]);
+            setWords(prev => [...prev, ...newWords]);
+        });
+    };
+
+    const setData = (newWords, newGroups) => {
+        setWords(newWords);
+        setGroups(newGroups);
+    };
 
     return {
         words,
@@ -107,10 +167,13 @@ export const useWords = () => {
         editWord,
         deleteWord,
         toggleMemorized,
+        updateWordProgress,
         addGroup,
         editGroup,
         deleteGroup,
         importData,
-        exportData
+        exportData,
+        loadDefaultSets,
+        setData
     };
 };

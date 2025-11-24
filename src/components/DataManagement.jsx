@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { Download, Upload, Printer } from 'lucide-react';
+import { Download, Upload, Printer, Package } from 'lucide-react';
 
-export const DataManagement = ({ onImport, onExport }) => {
+export const DataManagement = ({ onImport, onExport, onLoadDefaults }) => {
     const fileInputRef = useRef(null);
 
     const handlePrint = () => {
@@ -71,6 +71,19 @@ export const DataManagement = ({ onImport, onExport }) => {
                     className="hidden"
                 />
             </div>
+
+            {onLoadDefaults && (
+                <div className="mt-4">
+                    <button
+                        onClick={onLoadDefaults}
+                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 py-3 font-medium text-white hover:from-green-600 hover:to-emerald-700 transition-all shadow-md"
+                    >
+                        <Package className="h-5 w-5" />
+                        추천 TOEIC 세트 불러오기 (90개 단어)
+                    </button>
+                </div>
+            )}
+
             <p className="mt-3 text-center text-xs text-gray-400">
                 Backup your words or transfer them to another device.
             </p>
