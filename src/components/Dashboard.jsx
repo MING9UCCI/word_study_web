@@ -102,7 +102,7 @@ export const Dashboard = ({ words, groups }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat) => (
                     <div key={stat.label} className="rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:bg-gray-800">
                         <div className={`mb-3 inline-flex rounded-xl p-3 ${stat.bg}`}>
@@ -117,13 +117,13 @@ export const Dashboard = ({ words, groups }) => {
             {/* Achievements Section */}
             <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
                 <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">업적</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {achievements.map(achievement => (
                         <div
                             key={achievement.id}
                             className={`rounded-xl p-4 transition-all ${achievement.unlocked
-                                    ? achievement.bg + ' border-2 border-current'
-                                    : 'bg-gray-100 dark:bg-gray-700 opacity-60'
+                                ? achievement.bg + ' border-2 border-current'
+                                : 'bg-gray-100 dark:bg-gray-700 opacity-60'
                                 }`}
                         >
                             <div className="flex flex-col items-center text-center">

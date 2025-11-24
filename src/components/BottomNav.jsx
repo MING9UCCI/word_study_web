@@ -3,7 +3,7 @@ import { BookOpen, List, BarChart } from 'lucide-react';
 
 export const BottomNav = ({ currentMode, onModeChange }) => {
     return (
-        <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900">
+        <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900 md:hidden">
             <div className="mx-auto flex max-w-md justify-around">
                 <button
                     onClick={() => onModeChange('manage')}

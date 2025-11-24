@@ -4,6 +4,7 @@ import { WordForm } from './components/WordForm';
 import { WordList } from './components/WordList';
 import { StudyMode } from './components/StudyMode';
 import { BottomNav } from './components/BottomNav';
+import { DesktopNav } from './components/DesktopNav';
 import { GroupList } from './components/GroupList';
 import { QuizMode } from './components/QuizMode';
 import { DataManagement } from './components/DataManagement';
@@ -246,7 +247,9 @@ function App() {
         onSave={setTtsSettings}
       />
 
-      <main className="mx-auto max-w-md px-4 pb-24 pt-6">
+      <DesktopNav currentMode={currentMode} onModeChange={setCurrentMode} />
+
+      <main className="mx-auto max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl md:ml-64 px-4 md:px-6 lg:px-8 pb-24 md:pb-6 pt-6">
         {/* Back Button for Group View */}
         {currentGroupId && (
           <button
