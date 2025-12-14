@@ -45,12 +45,13 @@ export const useWords = () => {
         setWords(prev => prev.filter(w => w.groupId !== id));
     };
 
-    const addWord = (english, korean, groupId = 'default', example = '') => {
+    const addWord = (english, korean, groupId = 'default', example = '', pronunciation = '') => {
         const newWord = {
             id: Date.now().toString(),
             english,
             korean,
             example,
+            pronunciation,
             memorized: false,
             groupId,
             createdAt: Date.now(),
@@ -60,9 +61,9 @@ export const useWords = () => {
         setWords(prev => [newWord, ...prev]);
     };
 
-    const editWord = (id, newEnglish, newKorean) => {
+    const editWord = (id, newEnglish, newKorean, newPronunciation = '') => {
         setWords(prev => prev.map(word =>
-            word.id === id ? { ...word, english: newEnglish, korean: newKorean } : word
+            word.id === id ? { ...word, english: newEnglish, korean: newKorean, pronunciation: newPronunciation } : word
         ));
     };
 
@@ -143,6 +144,7 @@ export const useWords = () => {
                 english: word.english,
                 korean: word.korean,
                 example: word.example || '',
+                pronunciation: word.pronunciation || '',
                 groupId: groupId,
                 memorized: false,
                 level: 0,

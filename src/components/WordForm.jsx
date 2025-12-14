@@ -4,6 +4,7 @@ import { aiService } from '../services/aiService';
 
 export const WordForm = ({ onAdd }) => {
     const [english, setEnglish] = useState('');
+    const [pronunciation, setPronunciation] = useState('');
     const [korean, setKorean] = useState('');
     const [example, setExample] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
@@ -12,8 +13,9 @@ export const WordForm = ({ onAdd }) => {
         e.preventDefault();
         if (!english.trim() || !korean.trim()) return;
 
-        onAdd(english, korean, example);
+        onAdd(english, korean, example, pronunciation);
         setEnglish('');
+        setPronunciation('');
         setKorean('');
         setExample('');
     };
@@ -73,6 +75,20 @@ export const WordForm = ({ onAdd }) => {
                         {isAiLoading ? 'AI...' : 'AI'}
                     </button>
                 </div>
+            </div>
+
+            <div className="space-y-2">
+                <label htmlFor="pronunciation" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Pronunciation / Pinyin (Optional)
+                </label>
+                <input
+                    id="pronunciation"
+                    type="text"
+                    value={pronunciation}
+                    onChange={(e) => setPronunciation(e.target.value)}
+                    placeholder="e.g., nǐ hǎo"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                />
             </div>
 
             <div className="space-y-2">

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Download, Upload, Printer, Package } from 'lucide-react';
 
-export const DataManagement = ({ onImport, onExport, onLoadDefaults }) => {
+export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChinese }) => {
     const fileInputRef = useRef(null);
 
     const handlePrint = () => {
@@ -73,7 +73,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults }) => {
             </div>
 
             {onLoadDefaults && (
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                     <button
                         onClick={onLoadDefaults}
                         className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 py-3 font-medium text-white hover:from-green-600 hover:to-emerald-700 transition-all shadow-md"
@@ -81,6 +81,16 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults }) => {
                         <Package className="h-5 w-5" />
                         추천 TOEIC 세트 불러오기 (90개 단어)
                     </button>
+
+                    {onImportChinese && (
+                        <button
+                            onClick={onImportChinese}
+                            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 py-3 font-medium text-white hover:from-red-600 hover:to-orange-600 transition-all shadow-md"
+                        >
+                            <Package className="h-5 w-5" />
+                            🇨🇳 중국어 단어장 (6,7,9과) 불러오기
+                        </button>
+                    )}
                 </div>
             )}
 

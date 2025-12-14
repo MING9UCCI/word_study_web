@@ -6,24 +6,27 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
     const { speak } = useSpeech();
     const [editingId, setEditingId] = useState(null);
     const [editEnglish, setEditEnglish] = useState('');
+    const [editPronunciation, setEditPronunciation] = useState('');
     const [editKorean, setEditKorean] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
     const startEdit = (word) => {
         setEditingId(word.id);
         setEditEnglish(word.english);
+        setEditPronunciation(word.pronunciation || '');
         setEditKorean(word.korean);
     };
 
     const cancelEdit = () => {
         setEditingId(null);
         setEditEnglish('');
+        setEditPronunciation('');
         setEditKorean('');
     };
 
     const saveEdit = (id) => {
         if (editEnglish.trim() && editKorean.trim()) {
-            onEdit(id, editEnglish, editKorean);
+            onEdit(id, editEnglish, editKorean, editPronunciation);
             setEditingId(null);
         }
     };
@@ -69,8 +72,15 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                                     value={editEnglish}
                                     onChange={(e) => setEditEnglish(e.target.value)}
                                     className="w-full rounded-lg border border-gray-200 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                                    placeholder="English"
+                                    placeholder="English/Hanzi"
                                     autoFocus
+                                />
+                                <input
+                                    type="text"
+                                    value={editPronunciation}
+                                    onChange={(e) => setEditPronunciation(e.target.value)}
+                                    className="w-full rounded-lg border border-gray-200 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                    placeholder="Pronunciation"
                                 />
                                 <input
                                     type="text"
@@ -110,6 +120,11 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                                         <Volume2 className="h-4 w-4" />
                                     </button>
                                 </div>
+                                {word.pronunciation && (
+                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-0.5">
+                                        [{word.pronunciation}]
+                                    </p>
+                                )}
                                 <p className="text-gray-600 dark:text-gray-300">{word.korean}</p>
                             </div>
 

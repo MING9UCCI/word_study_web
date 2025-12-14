@@ -15,6 +15,7 @@ import { useWords } from './hooks/useWords';
 import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
 import { defaultSets } from './data/defaultData';
+import { chineseVocab } from './data/chineseData';
 import { ArrowLeft } from 'lucide-react';
 
 function App() {
@@ -137,6 +138,23 @@ function App() {
                 if (confirm('추천 TOEIC 세트 3개 (총 90개 단어)를 불러올까요?')) {
                   loadDefaultSets(defaultSets);
                   alert('✓ 추천 세트가 추가되었습니다!');
+                }
+              }}
+              onImportChinese={() => {
+                const chineseGroupName = '다락원 중국어 STEP1 (6,7,9과)';
+                if (groups.some(g => g.name === chineseGroupName)) {
+                  alert('⚠️ 중국어 단어장이 이미 존재합니다.');
+                  return;
+                }
+
+                if (confirm('중국어 단어장 (6,7,9과)을 추가하시겠습니까?')) {
+                  // We can repurpose loadDefaultSets or just manually add
+                  const newSet = {
+                    name: chineseGroupName,
+                    words: chineseVocab
+                  };
+                  loadDefaultSets([newSet]);
+                  alert('✓ 중국어 단어장이 추가되었습니다!');
                 }
               }}
             />

@@ -39,7 +39,12 @@ export const Flashcard = ({ word, isFlipped, onFlip }) => {
                     className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl bg-blue-50 p-8 shadow-lg backface-hidden dark:bg-blue-900/20"
                     style={{ transform: 'rotateY(180deg)' }}
                 >
-                    <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-400">{word.korean}</h2>
+                    {word.pronunciation && (
+                        <p className="mb-2 text-xl font-medium text-purple-600 dark:text-purple-400">
+                            [{word.pronunciation}]
+                        </p>
+                    )}
+                    <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-400 text-center">{word.korean}</h2>
                     <p className="absolute bottom-6 text-sm text-blue-400/60">Tap to flip back</p>
                 </div>
             </motion.div>
