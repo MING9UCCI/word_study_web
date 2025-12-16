@@ -256,6 +256,10 @@ function App() {
             alert('로그아웃 실패: ' + error.message);
           }
         }}
+        onLogoClick={() => {
+          setCurrentGroupId(null);
+          setCurrentMode('manage');
+        }}
       />
 
       <SettingsModal

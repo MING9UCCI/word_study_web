@@ -5,7 +5,10 @@ export const Dashboard = ({ words, groups }) => {
     // Calculate stats
     const totalWords = words.length;
     const masteredWords = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
-    const learningWords = words.filter(w => (w.level || 0) > 0 && (w.level || 0) < 5).length;
+    const learningWords = words.filter(w => {
+        const level = w.level || 0;
+        return level > 0 && level < 5 && !w.memorized;
+    }).length;
     const newWords = totalWords - masteredWords - learningWords;
 
     // Calculate streak (mock implementation for now, real one would need daily tracking)

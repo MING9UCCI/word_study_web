@@ -26,7 +26,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     }, [words, showUnmemorizedOnly]);
 
     const currentWord = studyWords[currentIndex];
-    const memorizedCount = words.filter(w => w.memorized).length;
+    const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
 
     const handleShuffle = () => {
         const shuffled = [...studyWords].sort(() => Math.random() - 0.5);
@@ -190,21 +190,14 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 </button>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-start gap-4">
                 <button
                     onClick={handlePrev}
                     disabled={currentIndex === 0}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 px-6 font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
                 >
                     <ArrowLeft className="h-5 w-5" />
-                    Prev
-                </button>
-                <button
-                    onClick={handleNext}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
-                >
-                    Next
-                    <ArrowRight className="h-5 w-5" />
+                    Previous
                 </button>
             </div>
 
