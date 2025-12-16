@@ -13,7 +13,32 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const [isFlipped, setIsFlipped] = useState(false);
     const [studyWords, setStudyWords] = useState(words);
     const [isFinished, setIsFinished] = useState(false);
-    const [gotItCount, setGotItCount] = useState(0); // Track Got it clicks
+    const [gotItCount, setGotItCount] = useState(0);
+    const [showResumeDialog, setShowResumeDialog] = useState(false);
+    const [savedSession, setSavedSession] = useState(null);
+
+    // Session storage key based on word IDs (unique per group)
+    const sessionKey = `study_session_${words.map(w => w.id).join('_').substring(0, 50)}`;
+
+    // Load saved session on mount
+    useEffect(() => {
+        const saved = localStorage.getItem(sessionKey);
+        if (saved) {
+            try {
+                const session = JSON.parse(saved);
+                // Check if session is recent (within last 24 hours)
+                const sessionAge = Date.now() - session.timestamp;
+                if (sessionAge < 24 * 60 * 60 * 1000 && session.studyWords.length > 0) {
+                    setSavedSession(session);
+                    setShowResumeDialog(true);
+                } else {
+                    localStorage.removeItem(sessionKey);
+                }
+            } catch (e) {
+                console.error('Failed to load session:', e);
+            }
+        }
+    }, [sessionKey]);
 
     // Filter words based on mode - but DON'T reset index when words update!
     useEffect(() => {
@@ -115,6 +140,46 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         setIsFinished(false);
     };
 
+    // Save session to localStorage whenever state changes
+    useEffect(() => {
+        if (!showResumeDialog && studyWords.length > 0 && studyWords.length < words.length) {
+            const session = {
+                studyWords: studyWords.map(w => w.id), // Save only IDs to reduce size
+                currentIndex,
+                gotItCount,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(sessionKey, JSON.stringify(session));
+        }
+    }, [studyWords, currentIndex, gotItCount, sessionKey, showResumeDialog, words.length]);
+
+    // Clear session when all done
+    useEffect(() => {
+        if (studyWords.length === 0 || isFinished) {
+            localStorage.removeItem(sessionKey);
+        }
+    }, [studyWords.length, isFinished, sessionKey]);
+
+    const handleResumeSession = () => {
+        if (savedSession) {
+            // Restore session state
+            const savedWordIds = new Set(savedSession.studyWords);
+            const restoredWords = words.filter(w => savedWordIds.has(w.id));
+            setStudyWords(restoredWords);
+            setCurrentIndex(Math.min(savedSession.currentIndex, restoredWords.length - 1));
+            setGotItCount(savedSession.gotItCount);
+            setShowResumeDialog(false);
+        }
+    };
+
+    const handleStartOver = () => {
+        localStorage.removeItem(sessionKey);
+        setStudyWords(words);
+        setCurrentIndex(0);
+        setGotItCount(0);
+        setShowResumeDialog(false);
+    };
+
     // Keyboard shortcuts - TEMPORARILY DISABLED DUE TO REFERENCE ERROR
     // TODO: Fix and re-enable keyboard shortcuts
     /*
@@ -163,6 +228,45 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [currentIndex, studyWords, isFinished, currentWord, handleNext, handlePrev, handleResult, handleShuffle]);
     */
+
+    // Show resume dialog if saved session exists
+    if (showResumeDialog && savedSession) {
+        const remainingWords = savedSession.studyWords.length;
+        const totalProgress = savedSession.gotItCount;
+
+        return (
+            <div className="flex h-full items-center justify-center">
+                <div className="max-w-md w-full space-y-6 rounded-2xl bg-white p-8 shadow-lg dark:bg-gray-800">
+                    <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">이전 학습 발견!</h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            마지막으로 {remainingWords}개 단어가 남아있었어요
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500">
+                            ({totalProgress}개 단어 완료)
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <button
+                            onClick={handleResumeSession}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all"
+                        >
+                            <RotateCcw className="h-5 w-5" />
+                            이어하기
+                        </button>
+                        <button
+                            onClick={handleStartOver}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white py-4 font-bold text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                            <Home className="h-5 w-5" />
+                            처음부터 시작
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (studyWords.length === 0) {
         return (
