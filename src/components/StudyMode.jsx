@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { Flashcard } from './Flashcard';
 import { ProgressBar } from './ProgressBar';
@@ -28,50 +28,57 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const currentWord = studyWords[currentIndex];
     const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
 
-    const handleShuffle = () => {
+    const handleNext = useCallback(() => {
+        setIsFlipped(false);
+        setTimeout(() => {
+            setCurrentIndex(prevIndex => {
+                const nextIndex = prevIndex + 1;
+                if (nextIndex >= studyWords.length) {
+                    setIsFinished(true);
+                    return prevIndex; // Don't increment if at the end
+                }
+                return nextIndex;
+            });
+        }, 200);
+    }, [studyWords.length]);
+
+    const handlePrev = useCallback(() => {
+        setCurrentIndex(prevIndex => {
+            if (prevIndex > 0) {
+                setIsFlipped(false);
+                return prevIndex - 1;
+            }
+            return prevIndex;
+        });
+    }, []);
+
+    const handleShuffle = useCallback(() => {
         const shuffled = [...studyWords].sort(() => Math.random() - 0.5);
         setStudyWords(shuffled);
         setCurrentIndex(0);
         setIsFlipped(false);
         setIsFinished(false);
-    };
+    }, [studyWords]);
 
-    const handleNext = () => {
-        setIsFlipped(false);
-        setTimeout(() => {
-            if (currentIndex < studyWords.length - 1) {
-                setCurrentIndex(prev => prev + 1);
-            } else {
-                setIsFinished(true);
-            }
-        }, 200);
-    };
-
-    const handlePrev = () => {
-        if (currentIndex > 0) {
-            setIsFlipped(false);
-            setCurrentIndex(prev => prev - 1);
-        }
-    };
-
-    const handleResult = (isCorrect) => {
-        if (currentWord) {
+    const handleResult = useCallback((isCorrect) => {
+        const word = studyWords[currentIndex];
+        if (word) {
             // If updateWordProgress is available (SRS mode), use it
             if (updateWordProgress) {
-                updateWordProgress(currentWord.id, isCorrect);
+                updateWordProgress(word.id, isCorrect);
             } else {
                 // Fallback for legacy behavior (only if correct)
-                if (isCorrect) onToggleMemorized(currentWord.id);
+                if (isCorrect) onToggleMemorized(word.id);
             }
             handleNext();
         }
-    };
+    }, [studyWords, currentIndex, updateWordProgress, onToggleMemorized, handleNext]);
 
-    const handleRestart = () => {
+    const handleRestart = useCallback(() => {
         setCurrentIndex(0);
         setIsFlipped(false);
         setIsFinished(false);
-    };
+    }, []);
 
     // Keyboard shortcuts - TEMPORARILY DISABLED DUE TO REFERENCE ERROR
     // TODO: Fix and re-enable keyboard shortcuts

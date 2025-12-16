@@ -8,7 +8,19 @@ export const useSpeech = () => {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
+
+        // Auto-detect language: if text contains Chinese characters, use zh-CN
+        const hasChinese = /[\u4e00-\u9fa5]/.test(text);
+        const hasKorean = /[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f]/.test(text);
+
+        if (hasChinese) {
+            utterance.lang = 'zh-CN';
+        } else if (hasKorean) {
+            utterance.lang = 'ko-KR';
+        } else {
+            utterance.lang = 'en-US';
+        }
+
         utterance.rate = options.rate || 1.0;
 
         if (options.voiceURI) {
