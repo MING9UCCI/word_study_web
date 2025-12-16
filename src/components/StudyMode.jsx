@@ -25,6 +25,55 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         setIsFinished(false);
     }, [words, showUnmemorizedOnly]);
 
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyPress = (e) => {
+            // Don't trigger if user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Prevent default for our shortcuts
+            const key = e.key.toLowerCase();
+
+            switch (key) {
+                case ' ': // Space - flip card
+                    e.preventDefault();
+                    setIsFlipped(prev => !prev);
+                    break;
+                case 'arrowright': // Right arrow - next
+                    e.preventDefault();
+                    handleNext();
+                    break;
+                case 'arrowleft': // Left arrow - previous
+                    e.preventDefault();
+                    handlePrev();
+                    break;
+                case '1':
+                case 'x': // 1 or X - Forgot
+                    e.preventDefault();
+                    if (!isFinished && currentWord) handleResult(false);
+                    break;
+                case '2':
+                case 'o': // 2 or O - Got it
+                    e.preventDefault();
+                    if (!isFinished && currentWord) handleResult(true);
+                    break;
+                case 's': // S - Shuffle
+                    e.preventDefault();
+                    handleShuffle();
+                    break;
+                case 'f': // F - Filter toggle
+                    e.preventDefault();
+                    setShowUnmemorizedOnly(prev => !prev);
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [currentIndex, studyWords.length, isFinished, currentWord, isFlipped]);
+
     const currentWord = studyWords[currentIndex];
     const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
 
@@ -134,16 +183,27 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center justify-between">
                 <ProgressBar total={words.length} completed={memorizedCount} />
-                <button
-                    onClick={() => setShowUnmemorizedOnly(!showUnmemorizedOnly)}
-                    className={`ml-4 rounded-lg p-2 transition-colors ${showUnmemorizedOnly
-                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
-                        }`}
-                    aria-label="Toggle unmemorized filter"
-                >
-                    <Filter className="h-5 w-5" />
-                </button>
+                <div className="relative ml-4 group">
+                    <button
+                        onClick={() => setShowUnmemorizedOnly(!showUnmemorizedOnly)}
+                        className={`rounded-lg p-2 transition-all ${showUnmemorizedOnly
+                            ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-500 dark:bg-blue-900/30 dark:text-blue-400 dark:ring-blue-400'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600'
+                            }`}
+                        aria-label="Toggle unmemorized filter"
+                    >
+                        <Filter className="h-5 w-5" />
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-10">
+                        <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap dark:bg-gray-700">
+                            {showUnmemorizedOnly
+                                ? `암기 안 된 단어만 (${studyWords.length}개)`
+                                : '전체 단어 보기 (F키)'}
+                            <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="flex-1 flex flex-col justify-center">
@@ -205,17 +265,26 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 <button
                     onClick={() => handleResult(false)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-orange-100 py-4 font-semibold text-orange-700 transition-transform active:scale-95 dark:bg-orange-900/30 dark:text-orange-400"
+                    title="Keyboard: 1 or X"
                 >
                     <X className="h-5 w-5" />
-                    Forgot
+                    <span>Forgot <span className="text-xs opacity-60">(1)</span></span>
                 </button>
                 <button
                     onClick={() => handleResult(true)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-green-100 py-4 font-semibold text-green-700 transition-transform active:scale-95 dark:bg-green-900/30 dark:text-green-400"
+                    title="Keyboard: 2 or O"
                 >
                     <Check className="h-5 w-5" />
-                    Got it
+                    <span>Got it <span className="text-xs opacity-60">(2)</span></span>
                 </button>
+            </div>
+
+            {/* Keyboard shortcuts hint */}
+            <div className="hidden md:block text-center pb-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                    💡 <span className="font-medium">키보드 단축키:</span> Space-뒤집기 | ←→-이동 | 1-Forgot | 2-Got it | S-셔플 | F-필터
+                </p>
             </div>
         </div>
     );
