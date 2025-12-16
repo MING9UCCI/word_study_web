@@ -31,18 +31,26 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const handleNext = () => {
         console.log('handleNext called, current index:', currentIndex, 'total:', studyWords.length);
         setIsFlipped(false);
-        if (currentIndex < studyWords.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-        } else {
-            setIsFinished(true);
-        }
+        // Use functional setState to avoid stale closure
+        setCurrentIndex(prevIndex => {
+            console.log('Updating index from', prevIndex, 'to', prevIndex + 1);
+            if (prevIndex < studyWords.length - 1) {
+                return prevIndex + 1;
+            } else {
+                setIsFinished(true);
+                return prevIndex;
+            }
+        });
     };
 
     const handlePrev = () => {
-        if (currentIndex > 0) {
-            setIsFlipped(false);
-            setCurrentIndex(currentIndex - 1);
-        }
+        setCurrentIndex(prevIndex => {
+            if (prevIndex > 0) {
+                setIsFlipped(false);
+                return prevIndex - 1;
+            }
+            return prevIndex;
+        });
     };
 
     const handleShuffle = () => {
