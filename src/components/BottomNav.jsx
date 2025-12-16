@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, List, BarChart } from 'lucide-react';
+import { BookOpen, List, BarChart, StickyNote } from 'lucide-react';
 
 export const BottomNav = ({ currentMode, onModeChange }) => {
     return (
@@ -24,6 +24,16 @@ export const BottomNav = ({ currentMode, onModeChange }) => {
                 >
                     <BookOpen className="h-6 w-6" />
                     <span className="text-xs font-medium">Study</span>
+                </button>
+                <button
+                    onClick={() => onModeChange('memo')}
+                    className={`flex flex-col items-center gap-1 ${currentMode === 'memo'
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                        }`}
+                >
+                    <StickyNote className="h-6 w-6" />
+                    <span className="text-xs font-medium">Memo</span>
                 </button>
                 <button
                     onClick={() => onModeChange('dashboard')}

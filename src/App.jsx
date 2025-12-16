@@ -11,6 +11,7 @@ import { DataManagement } from './components/DataManagement';
 import { SettingsModal } from './components/SettingsModal';
 import { Settings } from './components/Settings';
 import { Dashboard } from './components/Dashboard';
+import { Memo } from './components/Memo';
 import { useWords } from './hooks/useWords';
 import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
@@ -31,9 +32,20 @@ function App() {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [currentMode, setCurrentMode] = useState('manage'); // 'manage' | 'study' | 'dashboard'
+  const [currentMode, setCurrentMode] = useState('manage'); // 'manage' | 'study' | 'dashboard' | 'memo'
   const [currentGroupId, setCurrentGroupId] = useState(null); // null = showing group list
   const [studyType, setStudyType] = useState('flashcard'); // 'flashcard' | 'quiz'
+
+  // Memo state
+  const [memos, setMemos] = useState(() => {
+    const saved = localStorage.getItem('toeic-memos');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Save memos to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('toeic-memos', JSON.stringify(memos));
+  }, [memos]);
 
   const { words, groups, addWord, deleteWord, editWord, toggleMemorized, updateWordProgress, addGroup, deleteGroup, editGroup, importData, exportData, loadDefaultSets, setData } = useWords();
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
@@ -84,13 +96,13 @@ function App() {
     if (!user) return;
 
     const timer = setTimeout(() => {
-      syncToCloud(user.uid, words, groups).catch(error => {
+      syncToCloud(user.uid, words, groups, memos).catch(error => {
         console.error('Failed to sync to cloud:', error);
       });
     }, 2000); // Debounce 2 seconds
 
     return () => clearTimeout(timer);
-  }, [words, groups, user]);
+  }, [words, groups, memos, user]);
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -105,7 +117,45 @@ function App() {
     setCurrentGroupId(null);
   };
 
+  // Memo management functions
+  const addMemo = (content) => {
+    const newMemo = {
+      id: Date.now().toString(),
+      content,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    setMemos(prev => [newMemo, ...prev]);
+  };
+
+  const deleteMemo = (id) => {
+    if (confirm('이 메모를 삭제하시겠습니까?')) {
+      setMemos(prev => prev.filter(m => m.id !== id));
+    }
+  };
+
+  const editMemo = (id, newContent) => {
+    setMemos(prev => prev.map(m =>
+      m.id === id
+        ? { ...m, content: newContent, updatedAt: Date.now() }
+        : m
+    ));
+  };
+
   const renderContent = () => {
+    // Memo Mode
+    if (currentMode === 'memo') {
+      return (
+        <Memo
+          memos={memos}
+          onAddMemo={addMemo}
+          onDeleteMemo={deleteMemo}
+          onEditMemo={editMemo}
+        />
+      );
+    }
+
+    // Dashboard Mode
     if (currentMode === 'dashboard') {
       return <Dashboard words={words} groups={groups} />;
     }

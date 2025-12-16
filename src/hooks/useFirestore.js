@@ -7,8 +7,9 @@ export const useFirestore = () => {
      * @param {string} userId - User ID from auth
      * @param {Array} words - Words array
      * @param {Array} groups - Groups array
+     * @param {Array} memos - Memos array
      */
-    const syncToCloud = async (userId, words, groups) => {
+    const syncToCloud = async (userId, words, groups, memos = []) => {
         if (!userId) {
             throw new Error('User not authenticated');
         }
@@ -18,6 +19,7 @@ export const useFirestore = () => {
             await setDoc(userDocRef, {
                 words,
                 groups,
+                memos,
                 lastSynced: new Date().toISOString()
             });
 
@@ -47,6 +49,7 @@ export const useFirestore = () => {
                 return {
                     words: data.words || [],
                     groups: data.groups || [],
+                    memos: data.memos || [],
                     lastSynced: data.lastSynced
                 };
             } else {
