@@ -14,15 +14,21 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const [studyWords, setStudyWords] = useState(words);
     const [isFinished, setIsFinished] = useState(false);
 
-    // Filter words based on mode
+    // Filter words based on mode - but DON'T reset index when words update!
     useEffect(() => {
         const filtered = showUnmemorizedOnly
             ? words.filter(w => !w.memorized)
             : words;
         setStudyWords(filtered);
-        setCurrentIndex(0);
-        setIsFlipped(false);
-        setIsFinished(false);
+        // Only reset index when filter mode changes, not when words update
+    }, [showUnmemorizedOnly]);
+
+    // Separate effect to update studyWords when base words change, preserving index
+    useEffect(() => {
+        const filtered = showUnmemorizedOnly
+            ? words.filter(w => !w.memorized)
+            : words;
+        setStudyWords(filtered);
     }, [words, showUnmemorizedOnly]);
 
     const currentWord = studyWords[currentIndex];
