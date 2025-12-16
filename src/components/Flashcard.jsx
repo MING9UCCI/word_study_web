@@ -44,7 +44,16 @@ export const Flashcard = ({ word, isFlipped, onFlip }) => {
                             [{word.pronunciation}]
                         </p>
                     )}
-                    <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-400 text-center">{word.korean}</h2>
+                    <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-400 text-center mb-4">{word.korean}</h2>
+
+                    {word.example && (
+                        <div className="mt-4 max-w-lg text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                {word.example}
+                            </p>
+                        </div>
+                    )}
+
                     <p className="absolute bottom-6 text-sm text-blue-400/60">Tap to flip back</p>
                 </div>
             </motion.div>
