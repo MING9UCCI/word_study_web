@@ -13,6 +13,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const [isFlipped, setIsFlipped] = useState(false);
     const [studyWords, setStudyWords] = useState(words);
     const [isFinished, setIsFinished] = useState(false);
+    const [gotItCount, setGotItCount] = useState(0); // Track Got it clicks
 
     // Filter words based on mode - but DON'T reset index when words update!
     useEffect(() => {
@@ -32,7 +33,8 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     }, [words, showUnmemorizedOnly]);
 
     const currentWord = studyWords[currentIndex];
-    const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
+    // Progress is based on Got it count, not memorized count
+    const totalWords = words.length;
 
     const handleNext = () => {
         console.log('handleNext called, current index:', currentIndex, 'total:', studyWords.length);
@@ -74,16 +76,37 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
             return;
         }
 
-        // If updateWordProgress is available (SRS mode), use it
+        // Update word progress
         if (updateWordProgress) {
             updateWordProgress(currentWord.id, isCorrect);
         } else {
-            // Fallback for legacy behavior (only if correct)
             if (isCorrect) onToggleMemorized(currentWord.id);
         }
 
-        // Move to next card immediately
-        handleNext();
+        // If Got it, remove from study list and increase progress
+        if (isCorrect) {
+            setGotItCount(prev => prev + 1);
+            setStudyWords(prevWords => {
+                const newWords = prevWords.filter(w => w.id !== currentWord.id);
+
+                // If no more words, show completion
+                if (newWords.length === 0) {
+                    setIsFinished(true);
+                    return prevWords;
+                }
+
+                // Adjust index if needed
+                if (currentIndex >= newWords.length) {
+                    setCurrentIndex(newWords.length - 1);
+                }
+
+                return newWords;
+            });
+            setIsFlipped(false);
+        } else {
+            // Forgot: just move to next
+            handleNext();
+        }
     };
 
     const handleRestart = () => {
@@ -174,7 +197,10 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Session Complete!</h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                        You've reviewed all {studyWords.length} words in this list.
+                        You marked {gotItCount} word{gotItCount !== 1 ? 's' : ''} as "Got it"!
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {studyWords.length === 0 ? "All words learned! 🎉" : `${studyWords.length} word${studyWords.length !== 1 ? 's' : ''} remaining`}
                     </p>
                 </div>
 
@@ -201,7 +227,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     return (
         <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center justify-between">
-                <ProgressBar total={words.length} completed={memorizedCount} />
+                <ProgressBar total={totalWords} completed={gotItCount} />
                 <div className="relative ml-4 group">
                     <button
                         onClick={() => setShowUnmemorizedOnly(!showUnmemorizedOnly)}
