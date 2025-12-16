@@ -50,12 +50,12 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 case '1':
                 case 'x': // 1 or X - Forgot
                     e.preventDefault();
-                    if (!isFinished && currentWord) handleResult(false);
+                    if (!isFinished && studyWords[currentIndex]) handleResult(false);
                     break;
                 case '2':
                 case 'o': // 2 or O - Got it
                     e.preventDefault();
-                    if (!isFinished && currentWord) handleResult(true);
+                    if (!isFinished && studyWords[currentIndex]) handleResult(true);
                     break;
                 case 's': // S - Shuffle
                     e.preventDefault();
@@ -72,7 +72,8 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [currentIndex, studyWords.length, isFinished, currentWord, isFlipped]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const currentWord = studyWords[currentIndex];
     const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;

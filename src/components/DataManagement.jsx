@@ -88,7 +88,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
                             className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 py-3 font-medium text-white hover:from-red-600 hover:to-orange-600 transition-all shadow-md"
                         >
                             <Package className="h-5 w-5" />
-                            🇨🇳 중국어 단어장 (6,7,9과) 불러오기
+                            🇨🇳 중국어 단어장 불러오기
                         </button>
                     )}
                 </div>

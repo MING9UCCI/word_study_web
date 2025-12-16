@@ -191,13 +191,13 @@ function App() {
                 }
               }}
               onImportChinese={() => {
-                const chineseGroupName = '다락원 중국어 STEP1 (6,7,9과)';
+                const chineseGroupName = '다락원 중국어 STEP1';
                 if (groups.some(g => g.name === chineseGroupName)) {
                   alert('⚠️ 중국어 단어장이 이미 존재합니다.');
                   return;
                 }
 
-                if (confirm('중국어 단어장 (6,7,9과)을 추가하시겠습니까?')) {
+                if (confirm('중국어 단어장 (6, 7, 9, 10과)을 추가하시겠습니까?')) {
                   // We can repurpose loadDefaultSets or just manually add
                   const newSet = {
                     name: chineseGroupName,
