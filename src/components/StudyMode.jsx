@@ -28,57 +28,55 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
     const currentWord = studyWords[currentIndex];
     const memorizedCount = words.filter(w => (w.level || 0) >= 5 || w.memorized).length;
 
-    const handleNext = useCallback(() => {
+    const handleNext = () => {
+        console.log('handleNext called, current index:', currentIndex, 'total:', studyWords.length);
         setIsFlipped(false);
-        setTimeout(() => {
-            setCurrentIndex(prevIndex => {
-                const nextIndex = prevIndex + 1;
-                if (nextIndex >= studyWords.length) {
-                    setIsFinished(true);
-                    return prevIndex; // Don't increment if at the end
-                }
-                return nextIndex;
-            });
-        }, 200);
-    }, [studyWords.length]);
+        if (currentIndex < studyWords.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        } else {
+            setIsFinished(true);
+        }
+    };
 
-    const handlePrev = useCallback(() => {
-        setCurrentIndex(prevIndex => {
-            if (prevIndex > 0) {
-                setIsFlipped(false);
-                return prevIndex - 1;
-            }
-            return prevIndex;
-        });
-    }, []);
+    const handlePrev = () => {
+        if (currentIndex > 0) {
+            setIsFlipped(false);
+            setCurrentIndex(currentIndex - 1);
+        }
+    };
 
-    const handleShuffle = useCallback(() => {
+    const handleShuffle = () => {
         const shuffled = [...studyWords].sort(() => Math.random() - 0.5);
         setStudyWords(shuffled);
         setCurrentIndex(0);
         setIsFlipped(false);
         setIsFinished(false);
-    }, [studyWords]);
+    };
 
-    const handleResult = useCallback((isCorrect) => {
-        const word = studyWords[currentIndex];
-        if (word) {
-            // If updateWordProgress is available (SRS mode), use it
-            if (updateWordProgress) {
-                updateWordProgress(word.id, isCorrect);
-            } else {
-                // Fallback for legacy behavior (only if correct)
-                if (isCorrect) onToggleMemorized(word.id);
-            }
-            handleNext();
+    const handleResult = (isCorrect) => {
+        console.log('handleResult called, isCorrect:', isCorrect, 'currentWord:', currentWord);
+        if (!currentWord) {
+            console.error('No current word!');
+            return;
         }
-    }, [studyWords, currentIndex, updateWordProgress, onToggleMemorized, handleNext]);
 
-    const handleRestart = useCallback(() => {
+        // If updateWordProgress is available (SRS mode), use it
+        if (updateWordProgress) {
+            updateWordProgress(currentWord.id, isCorrect);
+        } else {
+            // Fallback for legacy behavior (only if correct)
+            if (isCorrect) onToggleMemorized(currentWord.id);
+        }
+
+        // Move to next card immediately
+        handleNext();
+    };
+
+    const handleRestart = () => {
         setCurrentIndex(0);
         setIsFlipped(false);
         setIsFinished(false);
-    }, []);
+    };
 
     // Keyboard shortcuts - TEMPORARILY DISABLED DUE TO REFERENCE ERROR
     // TODO: Fix and re-enable keyboard shortcuts
@@ -257,7 +255,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 </button>
             </div>
 
-            <div className="flex items-center justify-start gap-4">
+            <div className="flex items-center justify-between gap-4">
                 <button
                     onClick={handlePrev}
                     disabled={currentIndex === 0}
@@ -265,6 +263,14 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 >
                     <ArrowLeft className="h-5 w-5" />
                     Previous
+                </button>
+                <button
+                    onClick={handleNext}
+                    disabled={currentIndex === studyWords.length - 1}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 px-6 font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300"
+                >
+                    Next
+                    <ArrowRight className="h-5 w-5" />
                 </button>
             </div>
 
