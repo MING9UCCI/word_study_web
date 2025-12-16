@@ -73,43 +73,42 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         setIsFinished(false);
     };
 
-    // Keyboard shortcuts - placed after all handler functions
+    // Keyboard shortcuts - TEMPORARILY DISABLED DUE TO REFERENCE ERROR
+    // TODO: Fix and re-enable keyboard shortcuts
+    /*
     useEffect(() => {
         const handleKeyPress = (e) => {
-            // Don't trigger if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-            // Prevent default for our shortcuts
             const key = e.key.toLowerCase();
 
             switch (key) {
-                case ' ': // Space - flip card
+                case ' ':
                     e.preventDefault();
                     setIsFlipped(prev => !prev);
                     break;
-                case 'arrowright': // Right arrow - next
+                case 'arrowright':
                     e.preventDefault();
                     handleNext();
                     break;
-                case 'arrowleft': // Left arrow - previous
+                case 'arrowleft':
                     e.preventDefault();
                     handlePrev();
                     break;
                 case '1':
-                case 'x': // 1 or X - Forgot
+                case 'x':
                     e.preventDefault();
                     if (!isFinished && currentWord) handleResult(false);
                     break;
                 case '2':
-                case 'o': // 2 or O - Got it
+                case 'o':
                     e.preventDefault();
                     if (!isFinished && currentWord) handleResult(true);
                     break;
-                case 's': // S - Shuffle
+                case 's':
                     e.preventDefault();
                     handleShuffle();
                     break;
-                case 'f': // F - Filter toggle
+                case 'f':
                     e.preventDefault();
                     setShowUnmemorizedOnly(prev => !prev);
                     break;
@@ -121,6 +120,7 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [currentIndex, studyWords, isFinished, currentWord, handleNext, handlePrev, handleResult, handleShuffle]);
+    */
 
     if (studyWords.length === 0) {
         return (
@@ -280,12 +280,13 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
                 </button>
             </div>
 
-            {/* Keyboard shortcuts hint */}
+            {/* Keyboard shortcuts hint - DISABLED 
             <div className="hidden md:block text-center pb-4">
                 <p className="text-xs text-gray-400 dark:text-gray-500">
                     💡 <span className="font-medium">키보드 단축키:</span> Space-뒤집기 | ←→-이동 | 1-Forgot | 2-Got it | S-셔플 | F-필터
                 </p>
             </div>
+            */}
         </div>
     );
 };
