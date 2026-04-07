@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { Download, Upload, Printer, Package } from 'lucide-react';
+import { Download, Upload, Printer, Package, Camera } from 'lucide-react';
 
-export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChinese }) => {
+export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChinese, onOpenPhotoImport }) => {
     const fileInputRef = useRef(null);
 
     const handlePrint = () => {
@@ -41,6 +41,19 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
     return (
         <div className="mt-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800 no-print">
             <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Data Management</h3>
+            
+            {onOpenPhotoImport && (
+                <div className="mb-4">
+                    <button
+                        onClick={onOpenPhotoImport}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-4 font-bold text-white hover:from-blue-700 hover:to-purple-700 transition-all shadow-md active:scale-[0.98]"
+                    >
+                        <Camera className="h-6 w-6" />
+                        📷 사진으로 단어 자동 추가 (AI)
+                    </button>
+                </div>
+            )}
+
             <div className="flex gap-4">
                 <button
                     onClick={handlePrint}
@@ -54,7 +67,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-50 py-3 font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
                 >
                     <Download className="h-5 w-5" />
-                    Export JSON
+                    Export
                 </button>
                 <button
                     onClick={() => fileInputRef.current?.click()}
@@ -76,7 +89,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
                 <div className="mt-4 space-y-3">
                     <button
                         onClick={onLoadDefaults}
-                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 py-3 font-medium text-white hover:from-green-600 hover:to-emerald-700 transition-all shadow-md"
+                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 py-3 font-medium text-white hover:from-green-600 hover:to-emerald-700 transition-all shadow-md active:scale-[0.98]"
                     >
                         <Package className="h-5 w-5" />
                         추천 TOEIC 세트 불러오기 (90개 단어)
@@ -85,7 +98,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
                     {onImportChinese && (
                         <button
                             onClick={onImportChinese}
-                            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 py-3 font-medium text-white hover:from-red-600 hover:to-orange-600 transition-all shadow-md"
+                            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 py-3 font-medium text-white hover:from-red-600 hover:to-orange-600 transition-all shadow-md active:scale-[0.98]"
                         >
                             <Package className="h-5 w-5" />
                             🇨🇳 중국어 단어장 불러오기
@@ -94,7 +107,7 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
                 </div>
             )}
 
-            <p className="mt-3 text-center text-xs text-gray-400">
+            <p className="mt-4 text-center text-xs text-gray-400">
                 Backup your words or transfer them to another device.
             </p>
         </div>

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { X, Volume2 } from 'lucide-react';
+import { X, Volume2, Key } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
 
 export const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
     const { getVoices, speak } = useSpeech();
     const [availableVoices, setAvailableVoices] = useState([]);
     const [localSettings, setLocalSettings] = useState(settings);
+    const [geminiApiKey, setGeminiApiKey] = useState(() => localStorage.getItem('gemini-api-key') || import.meta.env.VITE_GEMINI_API_KEY || '');
 
     useEffect(() => {
         if (isOpen) {
@@ -17,6 +18,9 @@ export const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
 
             loadVoices();
             window.speechSynthesis.onvoiceschanged = loadVoices;
+            
+            // Reload API key when opening modal
+            setGeminiApiKey(localStorage.getItem('gemini-api-key') || import.meta.env.VITE_GEMINI_API_KEY || '');
 
             return () => {
                 window.speechSynthesis.onvoiceschanged = null;
@@ -28,6 +32,7 @@ export const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
 
     const handleSave = () => {
         onSave(localSettings);
+        localStorage.setItem('gemini-api-key', geminiApiKey);
         onClose();
     };
 
@@ -46,10 +51,28 @@ export const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
                 </div>
 
                 <div className="space-y-6">
+                    {/* API Key Setting */}
+                    <div className="space-y-2 border-b border-gray-100 dark:border-gray-700 pb-6">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Key className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gemini API Key</h3>
+                        </div>
+                        <input
+                            type="password"
+                            value={geminiApiKey}
+                            onChange={(e) => setGeminiApiKey(e.target.value)}
+                            placeholder="AI Studio API Key"
+                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                        />
+                        <p className="text-xs text-gray-400">
+                            Required for AI Word autocomplete & Photo import features.
+                        </p>
+                    </div>
+
                     {/* Speed Setting */}
                     <div className="space-y-2">
                         <label className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
-                            <span>Speed</span>
+                            <span>Pronunciation Speed</span>
                             <span className="text-blue-600 dark:text-blue-400">{localSettings.rate}x</span>
                         </label>
                         <input

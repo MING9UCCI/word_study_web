@@ -21,19 +21,14 @@ export const WordForm = ({ onAdd }) => {
     };
 
     const handleAiComplete = async () => {
-        alert('AI 자동 완성 기능은 추후 추가 예정입니다.');
-        return;
-
-        // Disabled for now
-        /*
         if (!english.trim()) {
             alert('영어 단어를 먼저 입력해주세요.');
             return;
         }
 
-        const apiKey = localStorage.getItem('openai-api-key');
+        const apiKey = localStorage.getItem('gemini-api-key') || import.meta.env.VITE_GEMINI_API_KEY;
         if (!apiKey) {
-            alert('설정에서 OpenAI API 키를 먼저 입력해주세요.');
+            alert('설정에서 Gemini API 키를 먼저 입력해주세요.');
             return;
         }
 
@@ -47,7 +42,6 @@ export const WordForm = ({ onAdd }) => {
         } finally {
             setIsAiLoading(false);
         }
-        */
     };
 
     return (

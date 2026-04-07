@@ -12,6 +12,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { Settings } from './components/Settings';
 import { Dashboard } from './components/Dashboard';
 import { Memo } from './components/Memo';
+import { PhotoImport } from './components/PhotoImport';
 import { useWords } from './hooks/useWords';
 import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
@@ -31,6 +32,7 @@ function App() {
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPhotoImportOpen, setIsPhotoImportOpen] = useState(false);
 
   const [currentMode, setCurrentMode] = useState('manage'); // 'manage' | 'study' | 'dashboard' | 'memo'
   const [currentGroupId, setCurrentGroupId] = useState(null); // null = showing group list
@@ -174,6 +176,7 @@ function App() {
             <DataManagement
               onImport={importData}
               onExport={exportData}
+              onOpenPhotoImport={() => setIsPhotoImportOpen(true)}
               onLoadDefaults={() => {
                 // Check if default sets already exist
                 const defaultSetNames = defaultSets.map(s => s.name);
@@ -317,6 +320,18 @@ function App() {
         onClose={() => setIsSettingsOpen(false)}
         settings={ttsSettings}
         onSave={setTtsSettings}
+      />
+
+      <PhotoImport
+        isOpen={isPhotoImportOpen}
+        onClose={() => setIsPhotoImportOpen(false)}
+        groups={groups}
+        onAddGroup={addGroup}
+        onSave={(newWords, groupId) => {
+            newWords.forEach(w => {
+                addWord(w.english, w.korean, groupId, w.example, w.pronunciation || '');
+            });
+        }}
       />
 
       <DesktopNav currentMode={currentMode} onModeChange={setCurrentMode} />

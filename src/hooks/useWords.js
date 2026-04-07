@@ -24,13 +24,15 @@ export const useWords = () => {
         localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups));
     }, [groups]);
 
-    const addGroup = (name) => {
+    const addGroup = (name, customId = null) => {
+        const id = customId || Date.now().toString();
         const newGroup = {
-            id: Date.now().toString(),
+            id,
             name,
             createdAt: Date.now(),
         };
         setGroups(prev => [...prev, newGroup]);
+        return id;
     };
 
     const editGroup = (id, newName) => {
