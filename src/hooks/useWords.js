@@ -25,7 +25,7 @@ export const useWords = () => {
     }, [groups]);
 
     const addGroup = (name, customId = null) => {
-        const id = customId || Date.now().toString();
+        const id = customId || Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
         const newGroup = {
             id,
             name,
@@ -49,7 +49,7 @@ export const useWords = () => {
 
     const addWord = (english, korean, groupId = 'default', example = '', pronunciation = '') => {
         const newWord = {
-            id: Date.now().toString(),
+            id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9),
             english,
             korean,
             example,

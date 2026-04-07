@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { WordForm } from './components/WordForm';
 import { WordList } from './components/WordList';
@@ -72,6 +72,14 @@ function App() {
     localStorage.setItem('toeic-tts-settings', JSON.stringify(ttsSettings));
   }, [ttsSettings]);
 
+  // Ref to always hold latest local data so cloud sync doesn't overwrite it with stale closures
+  const wordsRef = useRef(words);
+  const groupsRef = useRef(groups);
+  useEffect(() => {
+    wordsRef.current = words;
+    groupsRef.current = groups;
+  }, [words, groups]);
+
   // Cloud sync effect
   useEffect(() => {
     if (!user) return;
@@ -81,8 +89,8 @@ function App() {
       try {
         const cloudData = await syncFromCloud(user.uid);
         if (cloudData.words.length > 0 || cloudData.groups.length > 0) {
-          // Merge local and cloud data
-          const merged = mergeData(words, cloudData.words, groups, cloudData.groups);
+          // Merge using the latest local data from ref
+          const merged = mergeData(wordsRef.current, cloudData.words, groupsRef.current, cloudData.groups);
           setData(merged.words, merged.groups);
         }
       } catch (error) {
