@@ -18,7 +18,7 @@ import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
 import { defaultSets } from './data/defaultData';
 import { chineseVocab } from './data/chineseData';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -49,7 +49,7 @@ function App() {
     localStorage.setItem('toeic-memos', JSON.stringify(memos));
   }, [memos]);
 
-  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, updateWordProgress, addGroup, deleteGroup, editGroup, importData, exportData, loadDefaultSets, setData } = useWords();
+  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, updateWordProgress, addGroup, deleteGroup, editGroup, importData, exportData, exportGroup, loadDefaultSets, setData } = useWords();
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const { syncToCloud, syncFromCloud, mergeData } = useFirestore();
 
@@ -217,8 +217,30 @@ function App() {
       return (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">{currentGroup?.name}</h2>
-            <span className="text-sm text-gray-500">{currentGroupWords.length} words</span>
+            <div>
+              <h2 className="text-xl font-bold">{currentGroup?.name}</h2>
+              <span className="text-sm text-gray-500">{currentGroupWords.length} words</span>
+            </div>
+            <button
+              onClick={() => {
+                const data = exportGroup(currentGroupId);
+                if (data) {
+                  const blob = new Blob([data], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${currentGroup?.name || 'group'}-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }
+              }}
+              className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+            >
+              <Download className="h-4 w-4" />
+              Download Folder
+            </button>
           </div>
           <WordForm onAdd={(en, ko, ex) => addWord(en, ko, currentGroupId, ex)} />
           <WordList

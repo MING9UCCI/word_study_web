@@ -111,8 +111,18 @@ export const useWords = () => {
         try {
             const data = JSON.parse(jsonData);
             if (data.words && data.groups) {
-                setWords(data.words);
-                setGroups(data.groups);
+                // Merge data safely instead of replacing everything
+                setGroups(prev => {
+                    // Only add groups that don't already exist by id
+                    const newGroups = data.groups.filter(newG => !prev.some(g => g.id === newG.id));
+                    return [...prev, ...newGroups];
+                });
+                
+                setWords(prev => {
+                    // Only add words that don't already exist by id
+                    const newWords = data.words.filter(newW => !prev.some(w => w.id === newW.id));
+                    return [...newWords, ...prev]; // Put new words at the top
+                });
                 return true;
             }
             return false;
@@ -124,6 +134,17 @@ export const useWords = () => {
 
     const exportData = () => {
         return JSON.stringify({ words, groups }, null, 2);
+    };
+
+    const exportGroup = (groupId) => {
+        const groupToExport = groups.find(g => g.id === groupId);
+        if (!groupToExport) return null;
+
+        const wordsToExport = words.filter(w => w.groupId === groupId);
+        return JSON.stringify({ 
+            groups: [groupToExport], 
+            words: wordsToExport 
+        }, null, 2);
     };
 
     // Migration helper
@@ -177,6 +198,7 @@ export const useWords = () => {
         deleteGroup,
         importData,
         exportData,
+        exportGroup,
         loadDefaultSets,
         setData
     };
