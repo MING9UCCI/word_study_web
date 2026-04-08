@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Trash2, Volume2, Pencil, Check, X, Search, SortAsc, Clock } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Trash2, Volume2, Pencil, Check, X, Search, SortAsc, Clock, AlertTriangle, Copy } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
+import { getNormalizedKey } from '../utils/wordUtils';
 
 export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
     const { speak } = useSpeech();
@@ -10,6 +11,7 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
     const [editKorean, setEditKorean] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('latest'); // 'latest' | 'alphabetical'
+    const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false);
 
     const startEdit = (word) => {
         setEditingId(word.id);
@@ -38,16 +40,47 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
         (word.pronunciation && word.pronunciation.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    const sortedWords = [...filteredWords].sort((a, b) => {
-        if (sortBy === 'alphabetical') {
-            return a.english.localeCompare(b.english, undefined, { sensitivity: 'base' });
+    const sortedWords = useMemo(() => {
+        let result = [...filteredWords];
+
+        // Apply sorting
+        if (sortBy === 'alphabetical' || showDuplicatesOnly) {
+            result.sort((a, b) => a.english.localeCompare(b.english, undefined, { sensitivity: 'base' }));
         } else {
-            // Default to latest (assume higher createdAt or ID means newer)
-            const timeA = a.createdAt || 0;
-            const timeB = b.createdAt || 0;
-            return timeB - timeA;
+            result.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         }
-    });
+
+        // Dedicated duplicate detection if mode is active
+        if (showDuplicatesOnly) {
+            // Count occurrences of normalized keys
+            const keyCounts = {};
+            words.forEach(w => {
+                const key = getNormalizedKey(w.english);
+                if (key) {
+                    keyCounts[key] = (keyCounts[key] || 0) + 1;
+                }
+            });
+
+            // Filter to only show words that belong to a duplicate group
+            result = result.filter(w => {
+                const key = getNormalizedKey(w.english);
+                return key && keyCounts[key] > 1;
+            });
+
+            // Sort by normalized key to group them together
+            result.sort((a, b) => getNormalizedKey(a.english).localeCompare(getNormalizedKey(b.english)));
+        }
+
+        return result;
+    }, [filteredWords, sortBy, showDuplicatesOnly, words]);
+
+    // Check if a specific word is a duplicate (for highlighting)
+    const isDuplicate = (word) => {
+        if (!word.english) return false;
+        const key = getNormalizedKey(word.english);
+        if (!key) return false;
+        return words.filter(w => getNormalizedKey(w.english) === key).length > 1;
+    };
 
     if (words.length === 0) {
         return (
@@ -85,7 +118,7 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                     </button>
                     <button
                         onClick={() => setSortBy('alphabetical')}
-                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${sortBy === 'alphabetical'
+                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${sortBy === 'alphabetical' && !showDuplicatesOnly
                             ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
                             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
@@ -93,13 +126,27 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                         <SortAsc className="h-4 w-4" />
                         <span>가나다순</span>
                     </button>
+                    <button
+                        onClick={() => {
+                            setShowDuplicatesOnly(!showDuplicatesOnly);
+                            if (!showDuplicatesOnly) setSortBy('alphabetical');
+                        }}
+                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${showDuplicatesOnly
+                            ? 'bg-orange-100 text-orange-600 shadow-sm dark:bg-orange-900/40 dark:text-orange-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                    >
+                        <Copy className="h-4 w-4" />
+                        <span>중복 찾기</span>
+                    </button>
                 </div>
             </div>
 
             {sortedWords.map((word) => (
                 <div
                     key={word.id}
-                    className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
+                    className={`flex items-center justify-between rounded-xl p-4 shadow-sm transition-all dark:bg-gray-800 ${editingId === word.id ? 'bg-white ring-2 ring-blue-500' : 
+                        showDuplicatesOnly ? 'bg-orange-50/50 border-l-4 border-orange-400' : 'bg-white'}`}
                 >
                     {editingId === word.id ? (
                         <div className="flex w-full items-center gap-2">
@@ -149,6 +196,9 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         {word.english}
                                     </h3>
+                                    {showDuplicatesOnly && (
+                                        <AlertTriangle className="h-4 w-4 text-orange-500" title="중복 의심 단어" />
+                                    )}
                                     <button
                                         onClick={() => speak(word.english, ttsSettings)}
                                         className="rounded-full p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
