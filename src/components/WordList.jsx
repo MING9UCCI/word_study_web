@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Volume2, Pencil, Check, X, Search } from 'lucide-react';
+import { Trash2, Volume2, Pencil, Check, X, Search, SortAsc, Clock } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
 
 export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
@@ -9,6 +9,7 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
     const [editPronunciation, setEditPronunciation] = useState('');
     const [editKorean, setEditKorean] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('latest'); // 'latest' | 'alphabetical'
 
     const startEdit = (word) => {
         setEditingId(word.id);
@@ -33,8 +34,20 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
 
     const filteredWords = words.filter(word =>
         word.english.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        word.korean.includes(searchTerm)
+        word.korean.includes(searchTerm) ||
+        (word.pronunciation && word.pronunciation.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    const sortedWords = [...filteredWords].sort((a, b) => {
+        if (sortBy === 'alphabetical') {
+            return a.english.localeCompare(b.english, undefined, { sensitivity: 'base' });
+        } else {
+            // Default to latest (assume higher createdAt or ID means newer)
+            const timeA = a.createdAt || 0;
+            const timeB = b.createdAt || 0;
+            return timeB - timeA;
+        }
+    });
 
     if (words.length === 0) {
         return (
@@ -47,19 +60,43 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
 
     return (
         <div className="space-y-3">
-            {/* Search Bar */}
-            <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search words..."
-                    className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+            {/* Search and Sort Bar */}
+            <div className="flex flex-col md:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search words..."
+                        className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-9 pr-4 text-sm outline-none focus:border-blue-500 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    />
+                </div>
+                <div className="flex rounded-xl bg-gray-100 p-1 dark:bg-gray-700 self-end md:self-center">
+                    <button
+                        onClick={() => setSortBy('latest')}
+                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${sortBy === 'latest'
+                            ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                    >
+                        <Clock className="h-4 w-4" />
+                        <span>최신순</span>
+                    </button>
+                    <button
+                        onClick={() => setSortBy('alphabetical')}
+                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${sortBy === 'alphabetical'
+                            ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                    >
+                        <SortAsc className="h-4 w-4" />
+                        <span>가나다순</span>
+                    </button>
+                </div>
             </div>
 
-            {filteredWords.map((word) => (
+            {sortedWords.map((word) => (
                 <div
                     key={word.id}
                     className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"

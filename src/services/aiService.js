@@ -86,9 +86,9 @@ Please extract all entries (words, phrases, or conversational sentences).
 For each entry, provide:
 1. "english": The front of the card. 
    - For English books: the English word/phrase.
-   - For Chinese books: the Chinese characters (Hanzi).
+   - For Chinese books: the Chinese characters (Hanzi) ONLY. NEVER include Pinyin here.
 2. "pronunciation": 
-   - For Chinese books: provide the Pinyin with tone marks (e.g., "wǒ zài xiūxi ne").
+   - For Chinese books: provide the Pinyin with tone marks (e.g., "wǒ zài xiūxi ne") ONLY. NEVER include Hanzi here.
    - For English books: optional IPA or empty string.
 3. "korean": The Korean meaning.
    - Include part of speech like [명], [동] if applicable.

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Folder, Plus, Trash2, ChevronRight, Pencil, Check, X } from 'lucide-react';
+import { Folder, Plus, Trash2, ChevronRight, Pencil, Check, X, Library } from 'lucide-react';
+import { useSpeech } from '../hooks/useSpeech';
 
 export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup, onEditGroup }) => {
     const [newGroupName, setNewGroupName] = useState('');
@@ -67,6 +68,23 @@ export const GroupList = ({ groups, onSelectGroup, onAddGroup, onDeleteGroup, on
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Special "All Words" Item */}
+                <div
+                    onClick={() => onSelectGroup('all')}
+                    className="flex cursor-pointer items-center justify-between rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 shadow-md transition-all hover:shadow-lg text-white"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-white/20 p-2 text-white">
+                            <Library className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold underline underline-offset-4 decoration-2">전체 단어 보기</h3>
+                            <p className="text-xs text-blue-100 italic">모든 단어 관리 및 중복 제거</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-blue-100" />
+                </div>
+
                 {groups.map((group) => (
                     <div
                         key={group.id}

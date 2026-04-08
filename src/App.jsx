@@ -128,11 +128,15 @@ function App() {
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
   // Filter words by current group
-  const currentGroupWords = currentGroupId
-    ? words.filter(w => w.groupId === currentGroupId)
-    : [];
+  const currentGroupWords = currentGroupId === 'all'
+    ? words
+    : currentGroupId
+      ? words.filter(w => w.groupId === currentGroupId)
+      : [];
 
-  const currentGroup = groups.find(g => g.id === currentGroupId);
+  const currentGroup = currentGroupId === 'all'
+    ? { id: 'all', name: '전체 단어 리스트' }
+    : groups.find(g => g.id === currentGroupId);
 
   const handleBack = () => {
     setCurrentGroupId(null);
@@ -240,28 +244,32 @@ function App() {
               <h2 className="text-xl font-bold">{currentGroup?.name}</h2>
               <span className="text-sm text-gray-500">{currentGroupWords.length} words</span>
             </div>
-            <button
-              onClick={() => {
-                const data = exportGroup(currentGroupId);
-                if (data) {
-                  const blob = new Blob([data], { type: 'application/json' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${currentGroup?.name || 'group'}-backup-${new Date().toISOString().slice(0, 10)}.json`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }
-              }}
-              className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
-            >
-              <Download className="h-4 w-4" />
-              Download Folder
-            </button>
+            {currentGroupId !== 'all' && (
+              <button
+                onClick={() => {
+                  const data = exportGroup(currentGroupId);
+                  if (data) {
+                    const blob = new Blob([data], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentGroup?.name || 'group'}-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }
+                }}
+                className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+              >
+                <Download className="h-4 w-4" />
+                Download Folder
+              </button>
+            )}
           </div>
-          <WordForm onAdd={(en, ko, ex) => addWord(en, ko, currentGroupId, ex)} />
+          {currentGroupId !== 'all' && (
+            <WordForm onAdd={(en, ko, ex) => addWord(en, ko, currentGroupId, ex)} />
+          )}
           <WordList
             words={currentGroupWords}
             onDelete={deleteWord}
