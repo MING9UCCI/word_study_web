@@ -273,7 +273,6 @@ function App() {
           <WordList
             words={currentGroupWords}
             groups={groups}
-            currentGroupId={currentGroupId}
             onDelete={deleteWord}
             onEdit={editWord}
             ttsSettings={ttsSettings}
