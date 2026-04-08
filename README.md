@@ -109,19 +109,6 @@ cd word_study_web
 npm install
 ```
 
-### 환경 변수 설정
-
-`.env` 파일을 생성하고 Firebase 설정을 추가하세요:
-
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
 ### 개발 서버 실행
 
 ```bash
