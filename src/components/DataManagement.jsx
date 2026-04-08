@@ -1,8 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Download, Upload, Printer, Package, Camera } from 'lucide-react';
+import { ImportModal } from './ImportModal';
 
 export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChinese, onOpenPhotoImport }) => {
     const fileInputRef = useRef(null);
+    const [importingData, setImportingData] = useState(null);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const handlePrint = () => {
         window.print();
@@ -27,15 +30,30 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
 
         const reader = new FileReader();
         reader.onload = (event) => {
-            const success = onImport(event.target.result);
-            if (success) {
-                alert('Data imported successfully!');
-            } else {
-                alert('Failed to import data. Invalid format.');
+            try {
+                const data = JSON.parse(event.target.result);
+                if (data.groups && data.words) {
+                    setImportingData(data);
+                    setIsImportModalOpen(true);
+                } else {
+                    alert('Invalid format: File must contain groups and words.');
+                }
+            } catch (error) {
+                alert('Failed to parse JSON file.');
             }
             e.target.value = ''; // Reset input
         };
         reader.readAsText(file);
+    };
+
+    const handleConfirmedImport = (selectedData) => {
+        const success = onImport(JSON.stringify(selectedData));
+        if (success) {
+            alert('데이터를 성공적으로 가져왔습니다!');
+        } else {
+            alert('가져오기에 실패했습니다.');
+        }
+        setIsImportModalOpen(false);
     };
 
     return (
@@ -110,6 +128,13 @@ export const DataManagement = ({ onImport, onExport, onLoadDefaults, onImportChi
             <p className="mt-4 text-center text-xs text-gray-400">
                 Backup your words or transfer them to another device.
             </p>
+
+            <ImportModal 
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                data={importingData}
+                onConfirm={handleConfirmedImport}
+            />
         </div>
     );
 };

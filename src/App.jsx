@@ -13,6 +13,7 @@ import { Settings } from './components/Settings';
 import { Dashboard } from './components/Dashboard';
 import { Memo } from './components/Memo';
 import { PhotoImport } from './components/PhotoImport';
+import { PrintView } from './components/PrintView';
 import { useWords } from './hooks/useWords';
 import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
@@ -395,6 +396,12 @@ function App() {
         setCurrentMode(mode);
         setCurrentGroupId(null); // Reset group selection when changing tabs
       }} />
+
+      {/* Hidden Print View */}
+      <PrintView 
+        words={currentGroupId ? currentGroupWords : words}
+        groupName={currentGroupId ? currentGroup?.name : 'My Vocabulary Collection'}
+      />
     </div>
   );
 }
