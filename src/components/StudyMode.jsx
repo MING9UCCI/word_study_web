@@ -40,22 +40,21 @@ export const StudyMode = ({ words, onToggleMemorized, updateWordProgress, ttsSet
         }
     }, [sessionKey]);
 
-    // Filter words based on mode - but DON'T reset index when words update!
+    // Initialize studyWords once on mount or when filter changes
     useEffect(() => {
         const filtered = showUnmemorizedOnly
             ? words.filter(w => !w.memorized)
             : words;
-        setStudyWords(filtered);
-        // Only reset index when filter mode changes, not when words update
-    }, [showUnmemorizedOnly]);
-
-    // Separate effect to update studyWords when base words change, preserving index
-    useEffect(() => {
-        const filtered = showUnmemorizedOnly
-            ? words.filter(w => !w.memorized)
-            : words;
-        setStudyWords(filtered);
-    }, [words, showUnmemorizedOnly]);
+        
+        // Only set words if they are different to avoid unnecessary re-renders
+        // or if we are just starting (currentIndex 0)
+        setStudyWords(prev => {
+            // If we are in the middle of a session ( currentIndex > 0 ), 
+            // don't reset everything unless the filter itself changed
+            if (currentIndex > 0 && !showUnmemorizedOnly) return prev;
+            return filtered;
+        });
+    }, [showUnmemorizedOnly]); // Removed [words] dependency to stop resetting during session
 
     const currentWord = studyWords[currentIndex];
     // Progress is based on Got it count, not memorized count

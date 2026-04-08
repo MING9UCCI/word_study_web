@@ -9,7 +9,7 @@ export const useFirestore = () => {
      * @param {Array} groups - Groups array
      * @param {Array} memos - Memos array
      */
-    const syncToCloud = async (userId, words, groups, memos = []) => {
+    const syncToCloud = async (userId, words, groups, memos = [], deletedIds = []) => {
         if (!userId) {
             throw new Error('User not authenticated');
         }
@@ -20,6 +20,7 @@ export const useFirestore = () => {
                 words,
                 groups,
                 memos,
+                deletedIds,
                 lastSynced: new Date().toISOString()
             });
 
@@ -50,6 +51,7 @@ export const useFirestore = () => {
                     words: data.words || [],
                     groups: data.groups || [],
                     memos: data.memos || [],
+                    deletedIds: data.deletedIds || [],
                     lastSynced: data.lastSynced
                 };
             } else {
@@ -57,6 +59,8 @@ export const useFirestore = () => {
                 return {
                     words: [],
                     groups: [],
+                    memos: [],
+                    deletedIds: [],
                     lastSynced: null
                 };
             }
@@ -74,22 +78,42 @@ export const useFirestore = () => {
      * @param {Array} cloudGroups - Cloud groups
      * @returns {{words: Array, groups: Array}}
      */
-    const mergeData = (localWords, cloudWords, localGroups, cloudGroups) => {
+    const mergeData = (localWords, cloudWords, localGroups, cloudGroups, localDeleted = [], cloudDeleted = []) => {
+        // Combine deleted IDs
+        const combinedDeleted = [...new Set([...localDeleted, ...cloudDeleted])];
+        
         // Create a map of existing IDs
         const wordMap = new Map();
         const groupMap = new Map();
 
         // Add cloud data first (older data)
-        cloudWords.forEach(word => wordMap.set(word.id, word));
-        cloudGroups.forEach(group => groupMap.set(group.id, group));
+        cloudWords.forEach(word => {
+            if (!combinedDeleted.includes(word.id)) {
+                wordMap.set(word.id, word);
+            }
+        });
+        cloudGroups.forEach(group => {
+            if (!combinedDeleted.includes(group.id)) {
+                groupMap.set(group.id, group);
+            }
+        });
 
         // Override with local data (newer data takes precedence)
-        localWords.forEach(word => wordMap.set(word.id, word));
-        localGroups.forEach(group => groupMap.set(group.id, group));
+        localWords.forEach(word => {
+            if (!combinedDeleted.includes(word.id)) {
+                wordMap.set(word.id, word);
+            }
+        });
+        localGroups.forEach(group => {
+            if (!combinedDeleted.includes(group.id)) {
+                groupMap.set(group.id, group);
+            }
+        });
 
         return {
             words: Array.from(wordMap.values()),
-            groups: Array.from(groupMap.values())
+            groups: Array.from(groupMap.values()),
+            deletedIds: combinedDeleted
         };
     };
 

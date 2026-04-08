@@ -81,22 +81,32 @@ Format your response strictly as JSON:
                 mimeType = match[1];
             }
 
-            const prompt = `This is a picture of a vocabulary book (like a TOEIC vocab book).
-Please extract all the vocabulary entries you can read from the image.
+            const prompt = `This is a picture of a vocabulary book (English or Chinese). 
+Please extract all entries (words, phrases, or conversational sentences).
 For each entry, provide:
-1. "english": the English word.
-2. "korean": the Korean meaning.
-   - Include the part of speech in brackets like [명], [동], [형], etc.
-   - If there is ONLY ONE meaning, just write it normally (e.g. "[명] 구입(품)"). DO NOT use the slash (/) character.
-   - If there are MULTIPLE meanings, separate them with " / " (e.g. "[명] 구입(품) / [동] ~을 구입하다").
-3. "example": the English example sentence.
+1. "english": The front of the card. 
+   - For English books: the English word/phrase.
+   - For Chinese books: the Chinese characters (Hanzi).
+2. "pronunciation": 
+   - For Chinese books: provide the Pinyin with tone marks (e.g., "wǒ zài xiūxi ne").
+   - For English books: optional IPA or empty string.
+3. "korean": The Korean meaning.
+   - Include part of speech like [명], [동] if applicable.
+   - Separate multiple meanings with " / ".
+4. "example": An example sentence or usage.
 
-Format your response STRICTLY as a JSON array of objects without any markdown blocks outside the array:
+INTELLIGENT PROCESSING (Especially for Chinese patterns):
+- If the image contains repeating pattern exercises (e.g., "我在...呢" with multiple variations like "我在休息呢", "我在睡觉呢"), please split them into individual useful entries.
+- For conversational sentences, keep the logical flow but extract meaningful chunks if they are presented as vocabulary items.
+- Detect the language from the image automatically and format accordingly.
+
+Format your response STRICTLY as a JSON array of objects:
 [
   {
-    "english": "purchase",
-    "korean": "[명] 구입(품) / [동] ~을 구입하다",
-    "example": "the receipt for your recent purchase"
+    "english": "word or sentence",
+    "pronunciation": "pinyin or empty",
+    "korean": "[품사] 뜻",
+    "example": "usage example"
   }
 ]`;
 

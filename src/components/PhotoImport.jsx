@@ -16,7 +16,7 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
     
     // Edit state
     const [editingIdx, setEditingIdx] = useState(null);
-    const [editForm, setEditForm] = useState({ english: '', korean: '', example: '' });
+    const [editForm, setEditForm] = useState({ english: '', pronunciation: '', korean: '', example: '' });
 
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
@@ -101,6 +101,7 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
         setEditingIdx(index);
         setEditForm({ 
             english: word.english || '', 
+            pronunciation: word.pronunciation || '',
             korean: word.korean || '', 
             example: word.example || '' 
         });
@@ -260,7 +261,8 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
                                 <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
                                     <thead className="sticky top-0 bg-gray-50 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                                         <tr>
-                                            <th className="px-4 py-3">English</th>
+                                            <th className="px-4 py-3">Front (Character/Word)</th>
+                                            {results.some(r => r.pronunciation) && <th className="px-4 py-3">Pronunciation</th>}
                                             <th className="px-4 py-3">Meaning</th>
                                             <th className="px-4 py-3">Example</th>
                                             <th className="px-4 py-3 text-right">Actions</th>
@@ -278,14 +280,27 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
                                                                 value={editForm.english} 
                                                                 onChange={e => setEditForm({...editForm, english: e.target.value})}
                                                                 className="w-full rounded border px-2 py-1 dark:border-gray-600 dark:bg-gray-700" 
+                                                                placeholder="Front"
                                                             />
                                                         </td>
+                                                        {results.some(r => r.pronunciation) && (
+                                                            <td className="px-4 py-2">
+                                                                <input 
+                                                                    type="text" 
+                                                                    value={editForm.pronunciation} 
+                                                                    onChange={e => setEditForm({...editForm, pronunciation: e.target.value})}
+                                                                    className="w-full rounded border px-2 py-1 dark:border-gray-600 dark:bg-gray-700" 
+                                                                    placeholder="Pinyin/Pronunciation"
+                                                                />
+                                                            </td>
+                                                        )}
                                                         <td className="px-4 py-2">
                                                             <input 
                                                                 type="text" 
                                                                 value={editForm.korean} 
                                                                 onChange={e => setEditForm({...editForm, korean: e.target.value})}
                                                                 className="w-full rounded border px-2 py-1 dark:border-gray-600 dark:bg-gray-700" 
+                                                                placeholder="Meaning"
                                                             />
                                                         </td>
                                                         <td className="px-4 py-2">
@@ -294,6 +309,7 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
                                                                 value={editForm.example} 
                                                                 onChange={e => setEditForm({...editForm, example: e.target.value})}
                                                                 className="w-full rounded border px-2 py-1 dark:border-gray-600 dark:bg-gray-700" 
+                                                                placeholder="Example"
                                                             />
                                                         </td>
                                                         <td className="px-4 py-2 text-right">
@@ -311,6 +327,9 @@ export const PhotoImport = ({ isOpen, onClose, groups, onSave, onAddGroup }) => 
                                                     // View Mode
                                                     <>
                                                         <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white" onClick={() => startEdit(idx, word)}>{word.english}</td>
+                                                        {results.some(r => r.pronunciation) && (
+                                                            <td className="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium" onClick={() => startEdit(idx, word)}>{word.pronunciation}</td>
+                                                        )}
                                                         <td className="px-4 py-3" onClick={() => startEdit(idx, word)}>{word.korean}</td>
                                                         <td className="px-4 py-3 text-gray-500 italic" onClick={() => startEdit(idx, word)}>{word.example}</td>
                                                         <td className="px-4 py-3 text-right">

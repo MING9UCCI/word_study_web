@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 const STORAGE_KEY_WORDS = 'toeic-words';
 const STORAGE_KEY_GROUPS = 'toeic-groups';
+const STORAGE_KEY_DELETED = 'toeic-deleted-ids';
 
 export const useWords = () => {
     const [words, setWords] = useState(() => {
@@ -16,6 +17,11 @@ export const useWords = () => {
         ];
     });
 
+    const [deletedIds, setDeletedIds] = useState(() => {
+        const saved = localStorage.getItem(STORAGE_KEY_DELETED);
+        return saved ? JSON.parse(saved) : [];
+    });
+
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY_WORDS, JSON.stringify(words));
     }, [words]);
@@ -23,6 +29,10 @@ export const useWords = () => {
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups));
     }, [groups]);
+
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(deletedIds));
+    }, [deletedIds]);
 
     const addGroup = (name, customId = null) => {
         const id = customId || Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
@@ -45,6 +55,7 @@ export const useWords = () => {
         if (id === 'default') return; // Prevent deleting default group
         setGroups(prev => prev.filter(g => g.id !== id));
         setWords(prev => prev.filter(w => w.groupId !== id));
+        setDeletedIds(prev => [...new Set([...prev, id])]);
     };
 
     const addWord = (english, korean, groupId = 'default', example = '', pronunciation = '') => {
@@ -71,6 +82,7 @@ export const useWords = () => {
 
     const deleteWord = (id) => {
         setWords(prev => prev.filter(word => word.id !== id));
+        setDeletedIds(prev => [...new Set([...prev, id])]);
     };
 
     const toggleMemorized = (id) => {
@@ -119,8 +131,11 @@ export const useWords = () => {
                 });
                 
                 setWords(prev => {
-                    // Only add words that don't already exist by id
-                    const newWords = data.words.filter(newW => !prev.some(w => w.id === newW.id));
+                    // Only add words that don't already exist by id AND aren't deleted
+                    const newWords = data.words.filter(newW => 
+                        !prev.some(w => w.id === newW.id) && 
+                        !deletedIds.includes(newW.id)
+                    );
                     return [...newWords, ...prev]; // Put new words at the top
                 });
                 return true;
@@ -200,6 +215,8 @@ export const useWords = () => {
         exportData,
         exportGroup,
         loadDefaultSets,
-        setData
+        setData,
+        deletedIds,
+        setDeletedIds
     };
 };

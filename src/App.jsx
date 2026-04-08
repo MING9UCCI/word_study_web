@@ -49,7 +49,7 @@ function App() {
     localStorage.setItem('toeic-memos', JSON.stringify(memos));
   }, [memos]);
 
-  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, updateWordProgress, addGroup, deleteGroup, editGroup, importData, exportData, exportGroup, loadDefaultSets, setData } = useWords();
+  const { words, groups, addWord, deleteWord, editWord, toggleMemorized, updateWordProgress, addGroup, deleteGroup, editGroup, importData, exportData, exportGroup, loadDefaultSets, setData, deletedIds, setDeletedIds } = useWords();
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const { syncToCloud, syncFromCloud, mergeData } = useFirestore();
 
@@ -75,10 +75,12 @@ function App() {
   // Ref to always hold latest local data so cloud sync doesn't overwrite it with stale closures
   const wordsRef = useRef(words);
   const groupsRef = useRef(groups);
+  const deletedIdsRef = useRef(deletedIds);
   useEffect(() => {
     wordsRef.current = words;
     groupsRef.current = groups;
-  }, [words, groups]);
+    deletedIdsRef.current = deletedIds;
+  }, [words, groups, deletedIds]);
 
   // Cloud sync effect
   useEffect(() => {
@@ -88,10 +90,18 @@ function App() {
     const loadCloudData = async () => {
       try {
         const cloudData = await syncFromCloud(user.uid);
-        if (cloudData.words.length > 0 || cloudData.groups.length > 0) {
+        if (cloudData.words.length > 0 || cloudData.groups.length > 0 || cloudData.deletedIds?.length > 0) {
           // Merge using the latest local data from ref
-          const merged = mergeData(wordsRef.current, cloudData.words, groupsRef.current, cloudData.groups);
+          const merged = mergeData(
+              wordsRef.current, 
+              cloudData.words, 
+              groupsRef.current, 
+              cloudData.groups,
+              deletedIdsRef.current,
+              cloudData.deletedIds
+          );
           setData(merged.words, merged.groups);
+          setDeletedIds(merged.deletedIds);
         }
       } catch (error) {
         console.error('Failed to sync from cloud:', error);
@@ -106,13 +116,13 @@ function App() {
     if (!user) return;
 
     const timer = setTimeout(() => {
-      syncToCloud(user.uid, words, groups, memos).catch(error => {
+      syncToCloud(user.uid, words, groups, memos, deletedIds).catch(error => {
         console.error('Failed to sync to cloud:', error);
       });
     }, 2000); // Debounce 2 seconds
 
     return () => clearTimeout(timer);
-  }, [words, groups, memos, user]);
+  }, [words, groups, memos, user, deletedIds]);
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
