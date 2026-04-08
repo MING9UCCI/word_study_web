@@ -3,7 +3,7 @@ import { Trash2, Volume2, Pencil, Check, X, Search, SortAsc, Clock, AlertTriangl
 import { useSpeech } from '../hooks/useSpeech';
 import { getNormalizedKey } from '../utils/wordUtils';
 
-export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
+export const WordList = ({ words, groups, currentGroupId, onDelete, onEdit, ttsSettings }) => {
     const { speak } = useSpeech();
     const [editingId, setEditingId] = useState(null);
     const [editEnglish, setEditEnglish] = useState('');
@@ -192,10 +192,15 @@ export const WordList = ({ words, onDelete, onEdit, ttsSettings }) => {
                     ) : (
                         <>
                             <div className="flex-1">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         {word.english}
                                     </h3>
+                                    {currentGroupId === 'all' && word.groupId && (
+                                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-900/40 dark:text-blue-400">
+                                            {groups?.find(g => g.id === word.groupId)?.name || '기타'}
+                                        </span>
+                                    )}
                                     {showDuplicatesOnly && (
                                         <AlertTriangle className="h-4 w-4 text-orange-500" title="중복 의심 단어" />
                                     )}
